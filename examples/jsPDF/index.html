@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DevExtreme DataGrid to Excel / SheetJS</title>
+
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/18.2.3/css/dx.common.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/18.2.3/css/dx.light.css" />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn3.devexpress.com/jslib/20.1.4/js/dx.all.debug.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.4.1/html2canvas.js"></script>
+
+    <script type="text/javascript" src="../../data/employees.js"></script>
+
+</head>
+<body>
+
+    <div id="gridContainer"></div>
+
+    <script>
+      (function() {
+
+        function getHeaders(component) {
+            var result = [];
+            $.each( component.getVisibleColumns(), function( index, col ) {
+                if(col.dataField) {
+                    result.push({
+                        id: col.dataField,
+                        name: col.dataField,
+                        prompt: col.caption,
+                        width: typeof col.width === "number" ? col.width : 30,
+                        align: col.alignment,
+                        padding: 0
+                    });
+                }
+            });
+            return result;
+        }
+
+        function getRows(component) {
+            var result = [];
+            $.each( component.getVisibleRows(), function( index, row ) {
+                if(row.rowType === 'data') {
+                    var data = {};
+                    $.each( row.cells, function( index, cell ) {
+                        if(cell.column.dataField)
+                            data[cell.column.dataField] = cell.value ? cell.value.toString() : '';
+                    });
+                    result.push(data);
+                }
+            });
+            return result;
+        }
+
+      $('#gridContainer').dxDataGrid({
+        dataSource: employees,
+        showBorders: true,
+        selection: { mode: 'multiple' },
+        groupPanel: { visible: true },
+        export: { enabled: true, allowExportSelectedData: true },
+        onExporting: function(e) {
+          debugger;
+
+          var headers = getHeaders(e.component);
+          var rows = getRows(e.component);
+
+          var doc = new jsPDF({ putOnlyUsedFonts: true, orientation: "landscape" });
+          doc.setFontSize(12);
+
+          doc.table(1, 1, rows, headers, { autoSize: false });
+          //$.each( headers, function( index, header ) {
+          //    doc.cell(1, 1, header.width, 10, header.prompt, 1, header.align);
+          //});
+
+          doc.save('document.pdf');
+
+          // ...
+          e.cancel = true;
+        },
+        columns: [
+          'FirstName',
+          'LastName',
+          'City',
+          {
+            dataField: 'State',
+            groupIndex: 0 
+          }, {
+            dataField: 'Position',
+            width: 130
+          }, {
+            dataField: 'BirthDate',
+            dataType: 'date',
+            width: 100
+          }, {
+            dataField: 'HireDate',
+            dataType: 'date',
+            width: 100
+          }
+        ]
+      });
+            
+      })();
+    </script>
+
+</body>
+</html> 
