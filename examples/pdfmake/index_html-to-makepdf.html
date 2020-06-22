@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DevExtreme DataGrid to Excel / SheetJS</title>
+
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/18.2.3/css/dx.common.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/18.2.3/css/dx.light.css" />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn3.devexpress.com/jslib/20.1.4/js/dx.all.debug.js"></script>
+
+    <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script> -->
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.65/pdfmake.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.65/vfs_fonts.js'></script>
+
+    <script type="text/javascript" src="../../data/employees.js"></script>
+
+    <script src='https://cdn.jsdelivr.net/npm/html-to-pdfmake/docs/browser.js'></script>
+
+</head>
+<body>
+
+    <h3>pdfmake with 'html-to-pdfmake' lib</h3>
+    <p align="right">Click here<br />|| &emsp;<br />V&emsp;</p>
+
+    <div id="gridContainer"></div>
+
+    <script>
+        (function() {
+
+            $('#gridContainer').dxDataGrid({
+                dataSource: employees,
+                showBorders: true,
+                selection: { mode: 'multiple' },
+                groupPanel: { visible: true },
+                export: { enabled: true, allowExportSelectedData: true },
+                onExporting: function(e) {
+
+                    var options = {
+                        "tableAutoSize":true
+                    };
+                    var html = e.component.element()[0].outerHTML;
+                    var val = htmlToPdfmake(html, options);
+                    var dd = {content:val};
+                    pdfMake.createPdf(dd).download();
+
+                  // ...
+                  e.cancel = true;
+                },
+                columns: [
+                  'FirstName',
+                  'LastName',
+                  'City',
+                  {
+                    dataField: 'State',
+                    groupIndex: 0
+                  }, {
+                    dataField: 'Position',
+                    width: 130
+                  }, {
+                    dataField: 'BirthDate',
+                    dataType: 'date',
+                    width: 100
+                  }, {
+                    dataField: 'HireDate',
+                    dataType: 'date',
+                    width: 100
+                  }
+                ]
+            });
+
+        })();
+    </script>
+
+</body>
+</html>
