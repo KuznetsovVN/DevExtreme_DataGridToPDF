@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DevExtreme DataGrid to Excel / SheetJS</title>
+
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/18.2.3/css/dx.common.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/18.2.3/css/dx.light.css" />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn3.devexpress.com/jslib/20.1.4/js/dx.all.debug.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Faker/3.1.0/faker.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.6/jspdf.plugin.autotable.js"></script>
+
+</head>
+<body>
+
+    <table id="table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>First name</th>
+            <th>Last name</th>
+            <th>Email</th>
+            <th>Country</th>
+            <th>IP-address</th>
+            <th>SVG</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr>
+            <td>1</td>
+            <td>Donna</td>
+            <td>Moore</td>
+            <td>dmoore0@furl.net</td>
+            <td>China</td>
+            <td>211.56.242.221</td>
+            <td></td>
+        </tr>
+        <tr>
+            <td>2</td>
+            <td>Janice</td>
+            <td>Henry</td>
+            <td>jhenry1@theatlantic.com</td>
+            <td>Ukraine</td>
+            <td>38.36.7.199</td>
+            <td></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <script>
+        var faker = window.faker;
+
+        function bodyRows(rowCount) {
+            rowCount = rowCount || 10
+            var body = []
+            for (var j = 1; j <= rowCount; j++) {
+                body.push({
+                    id: j,
+                    name: faker.name.findName(),
+                    email: faker.internet.email(),
+                    city: faker.address.city(),
+                    expenses: faker.finance.amount(),
+                    svg: 'SVG'
+                })
+            }
+            return body
+        }
+
+        function Sample() {
+            var doc = new jsPDF('p', 'pt');
+            doc.text('Rowspan and colspan', 40, 50);
+
+            var totalPagesExp = '{total_pages_count_string}';
+
+            var raw = bodyRows(40);
+            var columnCount = 7;
+            var body = [];
+
+            for (var i = 0; i < raw.length; i++) {
+                var row = []
+                for (var key in raw[i]) {
+                    row.push(raw[i][key])
+                }
+                if (i % columnCount === 0) {
+                    row.unshift({
+                        rowSpan: columnCount,
+                        content: i / columnCount + 1,
+                        styles: { valign: 'middle', halign: 'center' },
+                    })
+                }
+                body.push(row)
+            }
+
+            doc.autoTable({
+                startY: 60,
+                head: [
+                    [
+                        {
+                            content: 'People',
+                            colSpan: columnCount,
+                            styles: { halign: 'center', fillColor: [22, 160, 133] },
+                        },
+                    ],
+                ],
+                body: body,
+                theme: 'grid',
+                didDrawPage: function (data) {
+                    debugger;
+                    // Header
+                    doc.setFontSize(20);
+                    doc.setTextColor(40);
+                    doc.setFontStyle('normal');
+                    doc.text('Report', data.settings.margin.left + 15, 22);
+
+                    // Footer
+                    var str = 'Page ' + doc.internal.getNumberOfPages();
+                    if (typeof doc.putTotalPages === 'function')
+                        str = str + ' of ' + totalPagesExp;
+                    doc.setFontSize(10);
+
+                    var pageSize = doc.internal.pageSize;
+                    var pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth();
+                    var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight();
+
+                    doc.setDrawColor(0);
+                    doc.setFillColor(0, 255, 0);
+                    doc.rect(0, pageHeight - 25, pageWidth, pageHeight, "FD");
+
+                    doc.setTextColor('#ff0000');
+                    doc.text(str, data.settings.margin.left, pageHeight - 10);
+                }
+            });
+
+            // Total page number plugin only available in jspdf v1.0+
+            if (typeof doc.putTotalPages === 'function') {
+                doc.putTotalPages(totalPagesExp)
+            }
+
+            return doc;
+        }
+
+      (function() {
+
+          Sample().save('table.pdf');
+
+      })();
+
+    </script>
+
+</body>
+</html>

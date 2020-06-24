@@ -11,8 +11,6 @@
 
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
 
-    <script type="text/javascript" src="../../data/employees.js"></script>
-
 </head>
 <body>
 
@@ -21,87 +19,61 @@
     <script>
       (function() {
 
-        function getHeaders(component) {
-            var result = [];
-            $.each( component.getVisibleColumns(), function( index, col ) {
-                if(col.dataField) {
-                    result.push({
-                        id: col.dataField,
-                        name: col.dataField,
-                        prompt: col.caption,
-                        width: typeof col.width === "number" ? col.width : 30,
-                        align: col.alignment,
-                        padding: 0
-                    });
-                }
-            });
-            return result;
-        }
+          var generateData = function(amount) {
+              var result = [];
+              var data = {
+                  coin: "100",
+                  game_group: "GameGroup",
+                  game_name: "XPTO2",
+                  game_version: "25",
+                  machine: "20485861",
+                  vlt: "0"
+              };
+              for (var i = 0; i < amount; i += 1) {
+                  data.id = (i + 1).toString();
+                  result.push(Object.assign({}, data));
+              }
+              return result;
+          };
 
-        function getRows(component) {
-            var result = [];
-            $.each( component.getVisibleRows(), function( index, row ) {
-                if(row.rowType === 'data') {
-                    var data = {};
-                    $.each( row.cells, function( index, cell ) {
-                        if(cell.column.dataField)
-                            data[cell.column.dataField] = cell.value ? cell.value.toString() : '';
-                    });
-                    result.push(data);
-                }
-            });
-            return result;
-        }
+          function createHeaders(keys) {
+              var result = [];
+              for (var i = 0; i < keys.length; i += 1) {
+                  result.push({
+                      id: keys[i],
+                      name: keys[i],
+                      prompt: keys[i],
+                      width: 120,
+                      align: "center",
+                      padding: 0
+                  });
+              }
+              return result;
+          }
 
-      $('#gridContainer').dxDataGrid({
-        dataSource: employees,
-        showBorders: true,
-        selection: { mode: 'multiple' },
-        groupPanel: { visible: true },
-        export: { enabled: true, allowExportSelectedData: true },
-        onExporting: function(e) {
-          debugger;
+          var headers = createHeaders([
+              "id",
+              "coin",
+              "game_group",
+              "game_name",
+              "game_version",
+              "machine",
+              "vlt"
+          ]);
 
-          var headers = getHeaders(e.component);
-          var rows = getRows(e.component);
+          //var doc = new jsPDF({ putOnlyUsedFonts: true, orientation: "landscape" });
+          var doc = new jsPDF('l', 'pt');
+          doc.setFontSize(10);
 
-          var doc = new jsPDF({ putOnlyUsedFonts: true, orientation: "landscape" });
-          doc.setFontSize(12);
-
-          doc.table(1, 1, rows, headers, { autoSize: false });
+          doc.table(1, 1, generateData(14), headers, { autoSize: false });
           //$.each( headers, function( index, header ) {
           //    doc.cell(1, 1, header.width, 10, header.prompt, 1, header.align);
           //});
 
           doc.save('document.pdf');
 
-          // ...
-          e.cancel = true;
-        },
-        columns: [
-          'FirstName',
-          'LastName',
-          'City',
-          {
-            dataField: 'State',
-            groupIndex: 0 
-          }, {
-            dataField: 'Position',
-            width: 130
-          }, {
-            dataField: 'BirthDate',
-            dataType: 'date',
-            width: 100
-          }, {
-            dataField: 'HireDate',
-            dataType: 'date',
-            width: 100
-          }
-        ]
-      });
-            
       })();
     </script>
 
 </body>
-</html> 
+</html>
