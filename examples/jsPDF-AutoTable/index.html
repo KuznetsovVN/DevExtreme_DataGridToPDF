@@ -71,7 +71,7 @@
 
         function Sample() {
             var doc = new jsPDF('p', 'pt');
-            doc.text('Rowspan and colspan', 40, 50);
+            doc.text('Example Title', 40, 50);
 
             var totalPagesExp = '{total_pages_count_string}';
 
@@ -108,15 +108,14 @@
                 body: body,
                 theme: 'grid',
                 didDrawPage: function (data) {
-                    debugger;
                     // Header
                     doc.setFontSize(20);
                     doc.setTextColor(40);
                     doc.setFontStyle('normal');
-                    doc.text('Report', data.settings.margin.left + 15, 22);
+                    doc.text('[Header] Report', data.settings.margin.left + 15, 22);
 
                     // Footer
-                    var str = 'Page ' + doc.internal.getNumberOfPages();
+                    var str = '[Footer] Page ' + doc.internal.getNumberOfPages();
                     if (typeof doc.putTotalPages === 'function')
                         str = str + ' of ' + totalPagesExp;
                     doc.setFontSize(10);

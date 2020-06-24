@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DevExtreme DataGrid to Excel / SheetJS</title>
+
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/18.2.3/css/dx.common.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/18.2.3/css/dx.light.css" />
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdn3.devexpress.com/jslib/20.1.4/js/dx.all.debug.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Faker/3.1.0/faker.min.js"></script>
+    <!-- <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script> -->
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.65/pdfmake.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.65/vfs_fonts.js'></script>
+
+    <script type="text/javascript" src="../../data/employees.js"></script>
+
+</head>
+<body>
+
+<script>
+    var faker = window.faker;
+
+    function bodyRows(rowCount) {
+        rowCount = rowCount || 10
+        var body = []
+        for (var j = 1; j <= rowCount; j++) {
+            body.push({
+                id: j.toString(),
+                name: faker.name.findName(),
+                email: faker.internet.email(),
+                city: faker.address.city(),
+                expenses: faker.finance.amount(),
+                svg: 'SVG'
+            })
+        }
+        return body
+    }
+
+    (function(){
+
+        var docDefinition = {
+            pageSize: 'A4',
+            pageOrientation: 'landscape',
+            pageMargins: [ 5, 5, 5, 5 ],
+            content: [
+            ],
+            styles: {
+                header1: {
+                    alignment: 'center',
+                    fontSize: 12,
+                    bold: true,
+                    margin: [0, 0, 0, 0],
+                    fillColor: '#00ff00',
+                    color: 'blue'
+                },
+                header2: {
+                    fontSize: 12,
+                    bold: false,
+                    margin: [0, 0, 0, 0],
+                    fillColor: 'yellow'
+                }
+            }
+        };
+
+        var bodyRaws = bodyRows(42);
+        var columnCount = 7;
+
+        // widths
+        var widths = [10, 30, 180, '*', 120, 60, 50];
+
+        // headers
+        var header1 = [{ text: '#', rowSpan: 2, alignment: 'center', margin: [0, 10, 0, 0] }, { text: 'People', style: 'header1', colSpan: 6 }, '', '', '', '', ''];
+        var header2 = ['', { text: 'ID', style: 'header2'}, { text: 'Band 1', style: 'header2', colSpan: 2 }, '', { text: 'Band 2', style: 'header2', colSpan: 3 }, '', ''];
+        var header3 = ['', 'ID', 'name', 'email', 'city', 'expenses', 'svg'];
+
+        // Rows
+        var rows = [];
+
+        rows.push(header1);
+        rows.push(header2);
+        rows.push(header3);
+
+        for (var i = 0; i < bodyRaws.length; i++) {
+            var row = []
+
+            if (i % columnCount === 0)
+                row.push({ text: (i / columnCount + 1).toString(), rowSpan: columnCount });
+            else
+                row.push('');
+
+            for (var key in bodyRaws[i]) {
+                if(key === 'svg') {
+                    row.push({
+                        svg: '<svg height="50" width="50">\n' +
+                            '  <circle cx="25" cy="25" r="22" stroke="black" stroke-width="3" fill="red" />\n' +
+                            '  Sorry, your browser does not support inline SVG.  \n' +
+                            '</svg>',
+                        fit: [50, 50]
+                    })
+                }
+                else
+                    row.push(bodyRaws[i][key])
+            }
+
+            rows.push(row)
+        }
+
+        docDefinition.content.push({ text: 'Example Title', color: 'gray' });
+
+        docDefinition.content.push(
+            {
+                table: {
+                    widths: widths,
+                    body: rows
+                }
+            }
+        );
+
+
+        var pdf = pdfMake.createPdf(docDefinition);
+        pdf.download();
+
+    })();
+
+</script>
+
+</body>
+</html>
