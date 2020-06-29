@@ -1,0 +1,68 @@
+var faker = window.faker;
+
+function GetData(rowCount) {
+    rowCount = rowCount || 200;
+    var body = [];
+    for (var j = 1; j <= rowCount; j++) {
+        body.push({
+            id: j.toString(),
+            firstName: faker.name.firstName(),
+            lastName: faker.name.lastName(),
+            findName: faker.name.findName(),
+            jobTitle: faker.name.jobTitle(),
+            prefix: faker.name.prefix(),
+            suffix: faker.name.suffix(),
+            title: faker.name.title(),
+            jobDescriptor: faker.name.jobDescriptor(),
+            jobArea: faker.name.jobArea(),
+            zipCode: faker.address.zipCode(),
+            city: faker.address.city(),
+            cityPrefix: faker.address.cityPrefix(),
+            citySuffix: faker.address.citySuffix(),
+            streetName: faker.address.streetName(),
+            streetAddress: faker.address.streetAddress(),
+            streetSuffix: faker.address.streetSuffix(),
+            streetPrefix: faker.address.streetPrefix(),
+            secondaryAddress: faker.address.secondaryAddress(),
+            county: faker.address.county(),
+            country: faker.address.country(),
+            countryCode: faker.address.countryCode(),
+            state: faker.address.state(),
+            stateAbbr: faker.address.stateAbbr(),
+            latitude: faker.address.latitude(),
+            longitude: faker.address.longitude(),
+            color: faker.commerce.color(),
+            department: faker.commerce.department(),
+            productName: faker.commerce.productName(),
+            price: faker.commerce.price(),
+            productAdjective: faker.commerce.productAdjective(),
+            productMaterial: faker.commerce.productMaterial(),
+            product: faker.commerce.product(),
+            //productDescription: faker.commerce.productDescription(),
+            suffixes: faker.company.suffixes(),
+            companyName: faker.company.companyName(),
+            companySuffix: faker.company.companySuffix(),
+            catchPhrase: faker.company.catchPhrase(),
+            bs: faker.company.bs(),
+            catchPhraseAdjective: faker.company.catchPhraseAdjective(),
+            catchPhraseDescriptor: faker.company.catchPhraseDescriptor(),
+            catchPhraseNoun: faker.company.catchPhraseNoun(),
+            bsAdjective: faker.company.bsAdjective(),
+            bsBuzz: faker.company.bsBuzz(),
+            bsNoun: faker.company.bsNoun(),
+            account: faker.finance.account(),
+            accountName: faker.finance.accountName(),
+            mask: faker.finance.mask(),
+            amount: faker.finance.amount(),
+            transactionType: faker.finance.transactionType(),
+            currencyCode: faker.finance.currencyCode(),
+            currencyName: faker.finance.currencyName(),
+            currencySymbol: faker.finance.currencySymbol(),
+            bitcoinAddress: faker.finance.bitcoinAddress(),
+            //ethereumAddress: faker.finance.ethereumAddress(),
+            //iban: faker.finance.iban(),
+            //bic: faker.finance.bic()
+        });
+    }
+    return body;
+}
