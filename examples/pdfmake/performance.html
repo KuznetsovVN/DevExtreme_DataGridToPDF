@@ -110,7 +110,7 @@
 
             t1 = Date.now();
             var doc = GenerateJsPDFDoc();
-            doc.download();
+            doc.download('pdfmake.pdf');
             TimeSpan("Generate PDF (secs): ", t1, Date.now());
 
             Message("MemorySizeOf (bytes): " + memorySizeOf(doc));
