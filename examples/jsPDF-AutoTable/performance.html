@@ -52,12 +52,14 @@
             var columnCount = 7;
             var body = [];
 
-            var widths = [];
             var headers = [];
+            var columnStyles = {};
 
+            var index = 0;
             for (var key in data[0]) {
-                widths.push('auto');
                 headers.push({ content: key });
+                columnStyles[index] = { cellWidth: 10 };
+                index += 1;
             }
 
             for (var i = 0; i < raw.length; i++) {
@@ -73,7 +75,8 @@
                 head: [
                     headers
                 ],
-                body: body
+                body: body,
+                columnStyles: columnStyles
             });
 
             return doc;
