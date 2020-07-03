@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DevExtreme DataGrid to PDF / jsPDF-AutoTable</title>
+
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/20.1.4/css/dx.common.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/20.1.4/css/dx.light.css" />
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.2/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn3.devexpress.com/jslib/20.1.4/js/dx.all.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.4.0/polyfill.min.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.65/pdfmake.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.65/vfs_fonts.js"></script>
+
+</head>
+<body>
+
+
+    <div class="dx-viewport demo-container">
+        <div id="DataGrid"></div>
+    </div>
+
+    <script>
+        $(function () {
+            function exportToPDF(doc, component, customizeCell) {
+
+                doc.docDefinition.styles['Title1'] = {
+                    fontSize: 18, bold: true, alignment: 'left'
+                };
+                doc.docDefinition.styles['TableHeader'] = {
+                    fillColor: '#2980ba',
+                    color: 'white'
+                };
+
+                doc.docDefinition.content.push({ text: 'pdfmake - Export To PDF - BANDS', style: 'Title1' });
+
+                const dataProvider = component.getDataProvider(component.getController("export")._selectionOnly);
+                var matrix = [];
+                var headerMatrix = [];
+                var widths = [];
+                return new Promise((resolve) => {
+                    dataProvider.ready().done(() => {
+                        const columns = dataProvider.getColumns();
+                        const headerRowCount = dataProvider.getHeaderRowCount();
+                        const dataRowsCount = dataProvider.getRowsCount();
+
+                        const mergedCells = [];
+                        const mergeRanges = [];
+
+                        for (let i = 0; i < columns.length; i++)
+                            widths.push(i === 0 ? 'auto' : '*');
+
+                        for (let rowIndex = 0; rowIndex < dataRowsCount; rowIndex++) {
+                            var row = [];
+                            var headerRow = [];
+                            const styles = dataProvider.getStyles();
+
+                            for (let cellIndex = 0; cellIndex < columns.length; cellIndex++) {
+                                const cellData = dataProvider.getCellData(rowIndex, cellIndex, true);
+                                const cell = cellData.cellSourceData;
+
+                                var pdfCell = { text: cellData.value };
+
+                                if (customizeCell !== undefined) {
+                                    customizeCell(pdfCell, cell);
+                                }
+
+                                if (rowIndex < headerRowCount) {
+                                    var mergedRange = tryGetMergeRange(rowIndex, cellIndex, mergedCells, dataProvider);
+                                    if (mergedRange && mergedRange.rowSpan > 0) {
+                                        pdfCell.rowSpan = mergedRange.rowSpan + 1;
+                                    }
+                                    if (mergedRange && mergedRange.colSpan > 0) {
+                                        pdfCell.colSpan = mergedRange.colSpan + 1;
+                                    }
+                                    pdfCell.style = 'TableHeader';
+                                }
+
+                                if (cellData.cellSourceData.rowType === 'header' && pdfCell.content !== "") {
+                                    headerRow.push(pdfCell);
+                                } else {
+                                    if (cellData.cellSourceData.rowType === 'group') {
+                                        pdfCell.colSpan = 4;
+                                    }
+                                    row.push(pdfCell);
+                                }
+                            }
+                            if (rowIndex >= headerRowCount) {
+                                matrix.push(row);
+                            } else {
+                                headerMatrix.push(headerRow);
+                            }
+                        }
+
+                        resolve();
+                    });
+                }).then(function () {
+                    var table = {};
+
+                    var headerRowCount = headerMatrix.length;
+                    var body = headerMatrix.concat(matrix);
+
+                    table = {
+                        table: {
+                            headerRows: headerRowCount,
+                            body: body,
+                            widths: widths
+                        },
+                        layout: {
+                            hLineWidth: function (i, node) {
+                                if (i <= headerRowCount)
+                                    return 1;
+                                return (i === node.table.body.length) ? 1 : 0;
+                            },
+                            vLineWidth: function (i, node) {
+                                return 1;
+                            },
+                            hLineColor: function (i, node) {
+                                if (i <= headerRowCount)
+                                    return 'white';
+                                return 'black';
+                            },
+                            vLineColor: function (i, node, r) {
+                                if (r < headerRowCount)
+                                    return 'white';
+                                return 'black';
+                            }
+                        }
+                    };
+
+                    doc.docDefinition.content.push(table);
+
+                });
+            }
+
+            function tryGetMergeRange(rowIndex, cellIndex, mergedCells, dataProvider) {
+                if (!mergedCells[rowIndex] || !mergedCells[rowIndex][cellIndex]) {
+                    const cellMerge = dataProvider.getCellMerging(rowIndex, cellIndex);
+                    if (cellMerge.colspan || cellMerge.rowspan) {
+                        for (let i = rowIndex; i <= rowIndex + cellMerge.rowspan || 0; i++) {
+                            for (let j = cellIndex; j <= cellIndex + cellMerge.colspan || 0; j++) {
+                                if (!mergedCells[i]) {
+                                    mergedCells[i] = [];
+                                }
+                                mergedCells[i][j] = true;
+                            }
+                        }
+                        return { rowSpan: cellMerge.rowspan, colSpan: cellMerge.colspan };
+                    }
+                }
+            }
+
+            $('#DataGrid').dxDataGrid({
+                dataSource: countries,
+                showBorders: true,
+                keyExpr: "ID",
+                selectedRowKeys: [3, 8, 5],
+                groupPanel: {
+                    visible: true
+                },
+                selection: {
+                    mode: 'multiple'
+                },
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true
+                },
+                onExporting: function (e) {
+                    var document = pdfMake.createPdf({
+                        pageSize: 'A4',
+                        pageOrientation: 'portrait',
+                        pageMargins: [15, 30, 15, 30],
+                        content: [
+                        ],
+                        styles: {
+                        },
+                        defaultStyle: {
+                            fontSize: 10,
+                            color: 'black'
+                        }
+                    });
+
+                    exportToPDF(document, e.component, function (pdfCell, gridCell) {
+                        if (gridCell.column.dataField === 'City') {
+                            pdfCell = pdfCell || {};
+                            pdfCell.fontStyle = 'italic';
+                            pdfCell.fillColor = 'lightblue';
+                        }
+
+                        if (gridCell.rowType === 'group') {
+                            pdfCell = pdfCell || {};
+                            pdfCell.fillColor = 'skyblue';
+                        }
+                    }).then(function () {
+                        // debugger
+                        // document - advanced document customization
+                    }).then(function () {
+                        document.download("filePDF.pdf");
+                    });
+
+                    e.cancel = true;
+                },
+                columns: ["Country", {
+                    headerCellTemplate: function (container) {
+                        container.append($("<div>Area, km<sup>2</sup></div>"));
+                    },
+                    dataField: "Area"
+                }, {
+                        caption: "Population",
+                        columns: [{
+                            caption: "Total",
+                            dataField: "Population_Total",
+                            format: "fixedPoint"
+                        }, {
+                            caption: "Urban",
+                            dataField: "Population_Urban",
+                            format: "percent"
+                        }]
+                    }, {
+                        caption: "Nominal GDP",
+                        columns: [{
+                            caption: "Total, mln $",
+                            dataField: "GDP_Total",
+                            format: "fixedPoint",
+                            sortOrder: "desc"
+                        }, {
+                            caption: "By Sector",
+                            columns: [{
+                                caption: "Agriculture",
+                                dataField: "GDP_Agriculture",
+                                width: 95,
+                                format: {
+                                    type: "percent",
+                                    precision: 1
+                                }
+                            }, {
+                                caption: "Industry",
+                                dataField: "GDP_Industry",
+                                width: 80,
+                                format: {
+                                    type: "percent",
+                                    precision: 1
+                                }
+                            }, {
+                                caption: "Services",
+                                dataField: "GDP_Services",
+                                width: 85,
+                                format: {
+                                    type: "percent",
+                                    precision: 1
+                                }
+                            }]
+                        }]
+                    }]
+            });
+        });
+
+        var countries = [{
+            "ID": 1,
+            "Country": "Brazil",
+            "Area": 8515767,
+            "Population_Urban": 0.85,
+            "Population_Rural": 0.15,
+            "Population_Total": 205809000,
+            "GDP_Agriculture": 0.054,
+            "GDP_Industry": 0.274,
+            "GDP_Services": 0.672,
+            "GDP_Total": 2353025
+        }, {
+            "ID": 2,
+            "Country": "China",
+            "Area": 9388211,
+            "Population_Urban": 0.54,
+            "Population_Rural": 0.46,
+            "Population_Total": 1375530000,
+            "GDP_Agriculture": 0.091,
+            "GDP_Industry": 0.426,
+            "GDP_Services": 0.483,
+            "GDP_Total": 10380380
+        }, {
+            "ID": 3,
+            "Country": "France",
+            "Area": 675417,
+            "Population_Urban": 0.79,
+            "Population_Rural": 0.21,
+            "Population_Total": 64529000,
+            "GDP_Agriculture": 0.019,
+            "GDP_Industry": 0.183,
+            "GDP_Services": 0.798,
+            "GDP_Total": 2846889
+        }, {
+            "ID": 4,
+            "Country": "Germany",
+            "Area": 357021,
+            "Population_Urban": 0.75,
+            "Population_Rural": 0.25,
+            "Population_Total": 81459000,
+            "GDP_Agriculture": 0.008,
+            "GDP_Industry": 0.281,
+            "GDP_Services": 0.711,
+            "GDP_Total": 3859547
+        }, {
+            "ID": 5,
+            "Country": "India",
+            "Area": 3287590,
+            "Population_Urban": 0.32,
+            "Population_Rural": 0.68,
+            "Population_Total": 1286260000,
+            "GDP_Agriculture": 0.174,
+            "GDP_Industry": 0.258,
+            "GDP_Services": 0.569,
+            "GDP_Total": 2047811
+        }, {
+            "ID": 6,
+            "Country": "Italy",
+            "Area": 301230,
+            "Population_Urban": 0.69,
+            "Population_Rural": 0.31,
+            "Population_Total": 60676361,
+            "GDP_Agriculture": 0.02,
+            "GDP_Industry": 0.242,
+            "GDP_Services": 0.738,
+            "GDP_Total": 2147952
+        }, {
+            "ID": 7,
+            "Country": "Japan",
+            "Area": 377835,
+            "Population_Urban": 0.93,
+            "Population_Rural": 0.07,
+            "Population_Total": 126920000,
+            "GDP_Agriculture": 0.012,
+            "GDP_Industry": 0.275,
+            "GDP_Services": 0.714,
+            "GDP_Total": 4616335
+        }, {
+            "ID": 8,
+            "Country": "Russia",
+            "Area": 17098242,
+            "Population_Urban": 0.74,
+            "Population_Rural": 0.26,
+            "Population_Total": 146544710,
+            "GDP_Agriculture": 0.039,
+            "GDP_Industry": 0.36,
+            "GDP_Services": 0.601,
+            "GDP_Total": 1857461
+        }, {
+            "ID": 9,
+            "Country": "United States",
+            "Area": 9147420,
+            "Population_Urban": 0.81,
+            "Population_Rural": 0.19,
+            "Population_Total": 323097000,
+            "GDP_Agriculture": 0.0112,
+            "GDP_Industry": 0.191,
+            "GDP_Services": 0.797,
+            "GDP_Total": 17418925
+        }, {
+            "ID": 10,
+            "Country": "United Kingdom",
+            "Area": 244820,
+            "Population_Urban": 0.82,
+            "Population_Rural": 0.18,
+            "Population_Total": 65097000,
+            "GDP_Agriculture": 0.007,
+            "GDP_Industry": 0.21,
+            "GDP_Services": 0.783,
+            "GDP_Total": 2945146
+        }];
+    </script>
+
+</body>
+</html>
