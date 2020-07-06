@@ -10,7 +10,7 @@
 ##### screenshot
 ![GitHub Logo](https://i.gyazo.com/b1fe637d5cbf2f711bb96de2acc5ef53.png)
 ##### codesnippet
-```
+```javascript
 let dataGridOptions = {
     onExporting: e => {
         var pdfDoc = new jsPDF();
@@ -35,7 +35,7 @@ let dataGridOptions = {
 ##### screenshot
 ![GitHub Logo](https://i.gyazo.com/47a58750d1d067e89b50de343615466d.png)
 ##### codesnippet
-```
+```javascript
 let dataGridOptions = {
     onExporting: e => {
         var pdfDoc = new jsPDF();
@@ -65,7 +65,7 @@ let dataGridOptions = {
 ##### screenshot
 ![GitHub Logo](https://i.gyazo.com/733bca3d142855c14d85c7ea7559fe6c.png)
 ##### codesnippet
-```
+```javascript
 let dataGridOptions = {
     onExporting: e => {
         var pdfDoc = new jsPDF('p', 'pt', 'a4');
