@@ -2,6 +2,7 @@
 
 [exportDxDataGrid.js](https://github.com/KuznetsovVN/DevExtreme_DataGridToPDF/blob/master/js/Exporter/exportDxDataGrid.js)
 
+---
 
 #### Blank
 
@@ -26,6 +27,7 @@ let dataGridOptions = {
 };  
 ```
 
+---
 
 #### Cell cusomization
 
@@ -54,6 +56,8 @@ let dataGridOptions = {
     } 
 };  
 ```
+
+---
 
 #### Cell template cusomization
 
