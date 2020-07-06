@@ -17,6 +17,8 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.6/jspdf.plugin.autotable.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvg/1.5/canvg.js"></script>
 
+    <script type="text/javascript" src="../../data/countries.js"></script>
+    <script type="text/javascript" src="../../js/exporter/exportDxDataGrid.js"></script>
 </head>
 <body>
 
@@ -26,100 +28,6 @@
 
     <script>
         $(function () {
-            function exportToPDF(doc, component, customizeCell) {
-                var finalY = doc.lastAutoTable.finalY || 10
-                doc.text('jsPDF - Export To PDF - Bands', 14, finalY + 15)
-
-                const dataProvider = component.getDataProvider(component.getController("export")._selectionOnly);
-                var matrix = [];
-                var headerMatrix = [];
-                return new Promise((resolve) => {
-                    dataProvider.ready().done(() => {
-                        const columns = dataProvider.getColumns();
-                        const headerRowCount = dataProvider.getHeaderRowCount();
-                        const dataRowsCount = dataProvider.getRowsCount();
-
-                        const mergedCells = [];
-                        const mergeRanges = [];
-
-                        for (let rowIndex = 0; rowIndex < dataRowsCount; rowIndex++) {
-                            var row = [];
-                            var headerRow = [];
-                            const styles = dataProvider.getStyles();
-
-                            for (let cellIndex = 0; cellIndex < columns.length; cellIndex++) {
-                                const cellData = dataProvider.getCellData(rowIndex, cellIndex, true);
-                                const cell = cellData.cellSourceData;
-
-                                var pdfCell = { content: cellData.value, styles: { lineWidth: 1 } };
-
-                                if (customizeCell !== undefined) {
-                                    customizeCell(pdfCell, cell);
-                                }
-
-                                if (rowIndex < headerRowCount) {
-                                    var mergedRange = tryGetMergeRange(rowIndex, cellIndex, mergedCells, dataProvider);
-                                    if (mergedRange && mergedRange.rowSpan > 0) {
-                                        pdfCell.rowSpan = mergedRange.rowSpan + 1;
-                                    }
-                                    if (mergedRange && mergedRange.colSpan > 0) {
-                                        pdfCell.colSpan = mergedRange.colSpan + 1;
-                                    }
-
-                                    console.log(pdfCell);
-                                }
-
-                                if (cellData.cellSourceData.rowType === 'header' && pdfCell.content !== "") {
-                                    headerRow.push(pdfCell);
-                                } else {
-                                    if (cellData.cellSourceData.rowType === 'group') {
-                                        pdfCell.colSpan = 4;
-                                    }
-                                    row.push(pdfCell);
-                                }
-
-
-                            }
-                            if (rowIndex >= headerRowCount) {
-                                matrix.push(row);
-                            } else {
-                                headerMatrix.push(headerRow);
-                            }
-                        }
-
-                        console.log(mergeRanges);
-
-                        resolve();
-                    });
-                }).then(function () {
-
-                    doc.autoTable({
-                        styles: { fillColor: [255, 87, 51] },
-                        tableLineWidth: 1,
-                        startY: finalY + 20,
-                        head: headerMatrix,
-                        body: matrix
-                    });
-                });
-            }
-
-            function tryGetMergeRange(rowIndex, cellIndex, mergedCells, dataProvider) {
-                if (!mergedCells[rowIndex] || !mergedCells[rowIndex][cellIndex]) {
-                    const cellMerge = dataProvider.getCellMerging(rowIndex, cellIndex);
-                    if (cellMerge.colspan || cellMerge.rowspan) {
-                        for (let i = rowIndex; i <= rowIndex + cellMerge.rowspan || 0; i++) {
-                            for (let j = cellIndex; j <= cellIndex + cellMerge.colspan || 0; j++) {
-                                if (!mergedCells[i]) {
-                                    mergedCells[i] = [];
-                                }
-                                mergedCells[i][j] = true;
-                            }
-                        }
-                        return { rowSpan: cellMerge.rowspan, colSpan: cellMerge.colspan };
-                    }
-                }
-            }
-
             $('#DataGrid').dxDataGrid({
                 dataSource: countries,
                 showBorders: true,
@@ -136,24 +44,14 @@
                     allowExportSelectedData: true
                 },
                 onExporting: function (e) {
-                    var document = new jsPDF()
-
-                    exportToPDF(document, e.component, function (pdfCell, gridCell) {
-                        //if(gridCell.column.dataField === 'City') {
-                        //  pdfCell.styles = pdfCell.styles || {};
-                        //   pdfCell.styles.fontStyle = 'italic';
-                        //    pdfCell.styles.fillColor = 'lightblue';
-                        //  }
-                        //
-                        //  if(gridCell.rowType === 'group') {
-                        //   pdfCell.styles = pdfCell.styles || {};
-                        //   pdfCell.styles.fillColor = 'skyblue';
-                        // }
+                    var pdfDoc = new jsPDF();
+                    exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
+                        // cusomize cell
+                        pdfCell.styles.lineWidth = 1;
                     }).then(function () {
-                        // debugger
-                        // document - advanced document customization
+                        // advanced pdfDoc customization
                     }).then(function () {
-                        document.save("filePDF.pdf");
+                        pdfDoc.save("filePDF.pdf");
                     });
 
                     e.cancel = true;
@@ -164,166 +62,54 @@
                     },
                     dataField: "Area"
                 }, {
-                        caption: "Population",
-                        columns: [{
-                            caption: "Total",
-                            dataField: "Population_Total",
-                            format: "fixedPoint"
-                        }, {
-                            caption: "Urban",
-                            dataField: "Population_Urban",
-                            format: "percent"
-                        }]
+                    caption: "Population",
+                    columns: [{
+                        caption: "Total",
+                        dataField: "Population_Total",
+                        format: "fixedPoint"
                     }, {
-                        caption: "Nominal GDP",
+                        caption: "Urban",
+                        dataField: "Population_Urban",
+                        format: "percent"
+                    }]
+                }, {
+                    caption: "Nominal GDP",
+                    columns: [{
+                        caption: "Total, mln $",
+                        dataField: "GDP_Total",
+                        format: "fixedPoint",
+                        sortOrder: "desc"
+                    }, {
+                        caption: "By Sector",
                         columns: [{
-                            caption: "Total, mln $",
-                            dataField: "GDP_Total",
-                            format: "fixedPoint",
-                            sortOrder: "desc"
+                            caption: "Agriculture",
+                            dataField: "GDP_Agriculture",
+                            width: 95,
+                            format: {
+                                type: "percent",
+                                precision: 1
+                            }
                         }, {
-                            caption: "By Sector",
-                            columns: [{
-                                caption: "Agriculture",
-                                dataField: "GDP_Agriculture",
-                                width: 95,
-                                format: {
-                                    type: "percent",
-                                    precision: 1
-                                }
-                            }, {
-                                caption: "Industry",
-                                dataField: "GDP_Industry",
-                                width: 80,
-                                format: {
-                                    type: "percent",
-                                    precision: 1
-                                }
-                            }, {
-                                caption: "Services",
-                                dataField: "GDP_Services",
-                                width: 85,
-                                format: {
-                                    type: "percent",
-                                    precision: 1
-                                }
-                            }]
+                            caption: "Industry",
+                            dataField: "GDP_Industry",
+                            width: 80,
+                            format: {
+                                type: "percent",
+                                precision: 1
+                            }
+                        }, {
+                            caption: "Services",
+                            dataField: "GDP_Services",
+                            width: 85,
+                            format: {
+                                type: "percent",
+                                precision: 1
+                            }
                         }]
                     }]
+                }]
             });
         });
-
-        var countries = [{
-            "ID": 1,
-            "Country": "Brazil",
-            "Area": 8515767,
-            "Population_Urban": 0.85,
-            "Population_Rural": 0.15,
-            "Population_Total": 205809000,
-            "GDP_Agriculture": 0.054,
-            "GDP_Industry": 0.274,
-            "GDP_Services": 0.672,
-            "GDP_Total": 2353025
-        }, {
-            "ID": 2,
-            "Country": "China",
-            "Area": 9388211,
-            "Population_Urban": 0.54,
-            "Population_Rural": 0.46,
-            "Population_Total": 1375530000,
-            "GDP_Agriculture": 0.091,
-            "GDP_Industry": 0.426,
-            "GDP_Services": 0.483,
-            "GDP_Total": 10380380
-        }, {
-            "ID": 3,
-            "Country": "France",
-            "Area": 675417,
-            "Population_Urban": 0.79,
-            "Population_Rural": 0.21,
-            "Population_Total": 64529000,
-            "GDP_Agriculture": 0.019,
-            "GDP_Industry": 0.183,
-            "GDP_Services": 0.798,
-            "GDP_Total": 2846889
-        }, {
-            "ID": 4,
-            "Country": "Germany",
-            "Area": 357021,
-            "Population_Urban": 0.75,
-            "Population_Rural": 0.25,
-            "Population_Total": 81459000,
-            "GDP_Agriculture": 0.008,
-            "GDP_Industry": 0.281,
-            "GDP_Services": 0.711,
-            "GDP_Total": 3859547
-        }, {
-            "ID": 5,
-            "Country": "India",
-            "Area": 3287590,
-            "Population_Urban": 0.32,
-            "Population_Rural": 0.68,
-            "Population_Total": 1286260000,
-            "GDP_Agriculture": 0.174,
-            "GDP_Industry": 0.258,
-            "GDP_Services": 0.569,
-            "GDP_Total": 2047811
-        }, {
-            "ID": 6,
-            "Country": "Italy",
-            "Area": 301230,
-            "Population_Urban": 0.69,
-            "Population_Rural": 0.31,
-            "Population_Total": 60676361,
-            "GDP_Agriculture": 0.02,
-            "GDP_Industry": 0.242,
-            "GDP_Services": 0.738,
-            "GDP_Total": 2147952
-        }, {
-            "ID": 7,
-            "Country": "Japan",
-            "Area": 377835,
-            "Population_Urban": 0.93,
-            "Population_Rural": 0.07,
-            "Population_Total": 126920000,
-            "GDP_Agriculture": 0.012,
-            "GDP_Industry": 0.275,
-            "GDP_Services": 0.714,
-            "GDP_Total": 4616335
-        }, {
-            "ID": 8,
-            "Country": "Russia",
-            "Area": 17098242,
-            "Population_Urban": 0.74,
-            "Population_Rural": 0.26,
-            "Population_Total": 146544710,
-            "GDP_Agriculture": 0.039,
-            "GDP_Industry": 0.36,
-            "GDP_Services": 0.601,
-            "GDP_Total": 1857461
-        }, {
-            "ID": 9,
-            "Country": "United States",
-            "Area": 9147420,
-            "Population_Urban": 0.81,
-            "Population_Rural": 0.19,
-            "Population_Total": 323097000,
-            "GDP_Agriculture": 0.0112,
-            "GDP_Industry": 0.191,
-            "GDP_Services": 0.797,
-            "GDP_Total": 17418925
-        }, {
-            "ID": 10,
-            "Country": "United Kingdom",
-            "Area": 244820,
-            "Population_Urban": 0.82,
-            "Population_Rural": 0.18,
-            "Population_Total": 65097000,
-            "GDP_Agriculture": 0.007,
-            "GDP_Industry": 0.21,
-            "GDP_Services": 0.783,
-            "GDP_Total": 2945146
-        }];
     </script>
 
 </body>
