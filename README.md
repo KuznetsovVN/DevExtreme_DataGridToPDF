@@ -5,6 +5,7 @@
 #### Requirements
 
 [jsPDF](https://github.com/MrRio/jsPDF)
+
 [jsPDF-AutoTable](https://github.com/simonbengtsson/jsPDF-AutoTable)
 
 ---
