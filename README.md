@@ -53,7 +53,7 @@ let dataGridOptions = {
         var pdfDoc = new jsPDF();
         exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
             // cusomize cell
-			pdfCell.styles.lineWidth = 1;
+            pdfCell.styles.lineWidth = 1;
             if (gridCell.rowType === 'data') {
                 pdfCell.styles.fillColor = [255, 87, 51];
                 pdfCell.styles.textColor = [0, 0, 255];
