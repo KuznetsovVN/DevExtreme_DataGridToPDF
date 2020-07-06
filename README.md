@@ -71,7 +71,7 @@ let dataGridOptions = {
         var pdfDoc = new jsPDF('p', 'pt', 'a4');
         var pdfAutotableConfig = {
             didDrawCell: function (data) {
-				// check custom data
+                // check custom data
                 if (data.cell.raw.UserCustomization) {
                     var obj = data.cell.raw.UserCustomization;
                     var currentPos = data.cell.getTextPos();
@@ -87,7 +87,7 @@ let dataGridOptions = {
             if (gridCell.column.dataField === 'Picture') {
                 if (gridCell.rowType === 'data') {
                     pdfCell.content = "";
-					// set custom data
+                    // set custom data
                     pdfCell.UserCustomization = pdfCell.UserCustomization = {
                         svg: '<svg height="14" width="14">\n' +
                                 '  <circle cx="7" cy="7" r="4" stroke="blue" stroke-width="1" fill="red" />\n' +
