@@ -16,7 +16,7 @@
 
 ---
 
-#### Blank
+#### Grouping
 
 [example](https://github.com/KuznetsovVN/DevExtreme_DataGridToPDF/blob/master/demos/dxDataGrid/jsPDF_grouping.html) || [live](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_grouping.html)
 ##### screenshot
@@ -29,6 +29,39 @@ let dataGridOptions = {
         exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
             // cusomize cell
         }).then(function () {
+            // advanced pdfDoc customization
+        }).then(function () {
+            pdfDoc.save("filePDF.pdf");
+        });
+
+        e.cancel = true;
+    } 
+};  
+```
+
+---
+
+#### Summary
+
+[example](https://github.com/KuznetsovVN/DevExtreme_DataGridToPDF/blob/master/demos/dxDataGrid/jsPDF_summary.html) || [live](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_summary.html)
+##### screenshot
+![GitHub Logo](https://i.gyazo.com/21a71e2af3733528d0b11f9ea601fbb4.png)
+##### codesnippet
+```javascript
+let dataGridOptions = {
+    onExporting: e => {
+        var pdfDoc = new jsPDF();
+        var autoTableConfig = {
+            tableLineWidth: 0.3
+        };
+        exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
+            // cusomize cell
+            pdfCell.styles.lineWidth = 0.3;
+
+            if (gridCell.rowType === 'data' && gridCell.column.dataField === 'OrderDate') {
+                pdfCell.content = Globalize.formatDate(gridCell.value, { date: "short" })
+            }
+        }, autoTableConfig).then(function () {
             // advanced pdfDoc customization
         }).then(function () {
             pdfDoc.save("filePDF.pdf");

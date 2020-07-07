@@ -10,6 +10,7 @@ var exportDataGrid = (function () {
 
         var matrix = [];
         var headerMatrix = [];
+        var footerMatrix = [];
 
         var customDrawMatrix = {
             head: [],
@@ -34,14 +35,16 @@ var exportDataGrid = (function () {
                 }
 
                 for (let rowIndex = 0; rowIndex < dataRowsCount; rowIndex++) {
-                    var row = [];
                     var headerRow = [];
+                    var footerRow = [];
+                    var row = [];
                     var customDrawCells = [];
                     const styles = dataProvider.getStyles();
 
                     for (let cellIndex = 0; cellIndex < columns.length; cellIndex++) {
                         const cellData = dataProvider.getCellData(rowIndex, cellIndex, true);
                         const cell = cellData.cellSourceData;
+                        const rowType = cellData.cellSourceData.rowType;
 
                         var pdfCell = {
                             content: cellData.value,
@@ -57,7 +60,7 @@ var exportDataGrid = (function () {
                         }
 
                         // Get rowSpan & colSpan in header
-                        if (rowIndex < headerRowCount) {
+                        if (rowType === 'header' || rowType === 'totalFooter') {
                             var mergedRange = tryGetMergeRange(rowIndex, cellIndex, mergedCells, dataProvider);
                             if (mergedRange && mergedRange.rowSpan > 0) {
                                 pdfCell.rowSpan = mergedRange.rowSpan + 1;
@@ -67,27 +70,33 @@ var exportDataGrid = (function () {
                             }
                         }
 
-                        // Add header/body row
-                        if (cellData.cellSourceData.rowType === 'header' && pdfCell.content !== "") {
+                        // Add header/footer/body row
+                        if (rowType === 'header' && pdfCell.content !== "") {
                             headerRow.push(pdfCell);
-                        } else {
-                            if (cellData.cellSourceData.rowType === 'group') {
+                        }
+                        else if (rowType === 'totalFooter') {
+                            pdfCell.content = pdfCell.content || '';
+                            footerRow.push(pdfCell);
+                        }
+                        else {
+                            if (rowType === 'group') {
                                 pdfCell.colSpan = columns.length;
                             }
                             row.push(pdfCell);
                         }
                     }
 
-                    if (rowIndex >= headerRowCount) {
-                        matrix.push(row);
-                    } else {
+                    if (headerRow.length > 0) {
                         headerMatrix.push(headerRow);
-                    }
-
-                    if (rowIndex >= headerRowCount) {
-                        customDrawMatrix['body'].push(customDrawCells);
-                    } else {
                         customDrawMatrix['head'].push(customDrawCells);
+                    }
+                    if (row.length > 0) {
+                        matrix.push(row);
+                        customDrawMatrix['body'].push(customDrawCells);
+                    }
+                    if (footerRow.length > 0) {
+                        footerMatrix.push(footerRow);
+                        customDrawMatrix['foot'].push(customDrawCells);
                     }
                 }
 
@@ -98,6 +107,7 @@ var exportDataGrid = (function () {
                 {
                     head: headerMatrix,
                     body: matrix,
+                    foot: footerMatrix,
                     columnStyles: columnStyles,
                     didDrawCell: function (data) {
                         var matrix = customDrawMatrix[data.row.section];

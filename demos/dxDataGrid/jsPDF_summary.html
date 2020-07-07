@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DevExtreme DataGrid to PDF / jsPDF-AutoTable</title>
+
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/20.1.4/css/dx.common.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/20.1.4/css/dx.light.css" />
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cldrjs/0.4.4/cldr.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cldrjs/0.4.4/cldr/event.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cldrjs/0.4.4/cldr/supplemental.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cldrjs/0.4.4/cldr/unresolved.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/globalize/1.1.1/globalize.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/globalize/1.1.1/globalize/message.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/globalize/1.1.1/globalize/number.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/globalize/1.1.1/globalize/currency.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/globalize/1.1.1/globalize/date.min.js"></script>
+
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.2/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn3.devexpress.com/jslib/20.1.4/js/dx.all.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.4.0/polyfill.min.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.6/jspdf.plugin.autotable.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvg/1.5/canvg.js"></script>
+
+    <script type="text/javascript" src="../../data/orders.js"></script>
+    <script type="text/javascript" src="../../js/exporter/exportDxDataGrid.js"></script>
+</head>
+<body>
+
+    <div class="dx-viewport demo-container">
+        <div id="DataGrid"></div>
+    </div>
+
+    <script>
+        $(function () {
+            $('#DataGrid').dxDataGrid({
+                showBorders: true,
+                dataSource: orders,
+                keyExpr: "ID",
+                showBorders: true,
+                selection: {
+                    mode: "multiple"
+                },
+                selectedRowKeys: [3, 8, 5],
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true
+                },
+                onExporting: function (e) {
+                    var pdfDoc = new jsPDF();
+                    var autoTableConfig = {
+                        tableLineWidth: 0.3
+                    };
+                    exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
+                        // cusomize cell
+                        pdfCell.styles.lineWidth = 0.3;
+
+                        if (gridCell.rowType === 'data' && gridCell.column.dataField === 'OrderDate') {
+                            pdfCell.content = Globalize.formatDate(gridCell.value, { date: "short" })
+                        }
+                    }, autoTableConfig).then(function () {
+                        // advanced pdfDoc customization
+                    }).then(function () {
+                        pdfDoc.save("filePDF.pdf");
+                    });
+
+                    e.cancel = true;
+                },
+                columns: [{
+                    dataField: "OrderNumber",
+                    width: 130,
+                    caption: "Invoice Number"
+                }, {
+                    dataField: "OrderDate",
+                    dataType: "date",
+                    width: 160
+                },
+                    "Employee", {
+                    caption: "City",
+                    dataField: "CustomerStoreCity"
+                }, {
+                    caption: "State",
+                    dataField: "CustomerStoreState"
+                }, {
+                    dataField: "SaleAmount",
+                    alignment: "right",
+                    format: "currency"
+                }
+                ],
+                summary: {
+                    totalItems: [{
+                        column: "OrderNumber",
+                        summaryType: "count"
+                    }, {
+                        column: "OrderDate",
+                        summaryType: "min",
+                        customizeText: function (data) {
+                            return "First: " + Globalize.formatDate(data.value, { date: "medium" });
+                        }
+                    }, {
+                        column: "SaleAmount",
+                        summaryType: "sum",
+                        valueFormat: "currency"
+                    }]
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>
