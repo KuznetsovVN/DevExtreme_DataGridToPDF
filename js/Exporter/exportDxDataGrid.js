@@ -10,6 +10,13 @@ var exportDataGrid = (function () {
 
         var matrix = [];
         var headerMatrix = [];
+
+        var customDrawMatrix = {
+            head: [],
+            body: [],
+            foot: []
+        };
+
         var columnStyles = [];
 
         return new Promise((resolve) => {
@@ -29,18 +36,24 @@ var exportDataGrid = (function () {
                 for (let rowIndex = 0; rowIndex < dataRowsCount; rowIndex++) {
                     var row = [];
                     var headerRow = [];
+                    var customDrawCells = [];
                     const styles = dataProvider.getStyles();
 
                     for (let cellIndex = 0; cellIndex < columns.length; cellIndex++) {
                         const cellData = dataProvider.getCellData(rowIndex, cellIndex, true);
                         const cell = cellData.cellSourceData;
 
-                        var pdfCell = { content: cellData.value, styles: {} };
-
+                        var pdfCell = {
+                            content: cellData.value,
+                            customDrawCell: null,
+                            styles: {}
+                        };
 
                         // Customize cell Event
                         if (customizeCell !== undefined) {
                             customizeCell(pdfCell, cell);
+                            customDrawCells.push(pdfCell.customDrawCell);
+                            delete pdfCell.customDrawCell;
                         }
 
                         // Get rowSpan & colSpan in header
@@ -70,6 +83,12 @@ var exportDataGrid = (function () {
                     } else {
                         headerMatrix.push(headerRow);
                     }
+
+                    if (rowIndex >= headerRowCount) {
+                        customDrawMatrix['body'].push(customDrawCells);
+                    } else {
+                        customDrawMatrix['head'].push(customDrawCells);
+                    }
                 }
 
                 resolve();
@@ -79,7 +98,13 @@ var exportDataGrid = (function () {
                 {
                     head: headerMatrix,
                     body: matrix,
-                    columnStyles: columnStyles
+                    columnStyles: columnStyles,
+                    didDrawCell: function (data) {
+                        var matrix = customDrawMatrix[data.row.section];
+                        var customDrawFunc = matrix[data.row.index][data.column.index];
+                        if (customDrawFunc)
+                            customDrawFunc(data);
+                    }
                 },
                 autoTableOptions);
 
