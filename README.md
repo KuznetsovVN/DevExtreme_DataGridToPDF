@@ -128,7 +128,7 @@ let dataGridOptions = {
 
 [example](https://github.com/KuznetsovVN/DevExtreme_DataGridToPDF/blob/master/demos/dxDataGrid/jsPDF_bands.html) || [live](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_bands.html)
 ##### screenshot
-![GitHub Logo](https://i.gyazo.com/47a58750d1d067e89b50de343615466d.png)
+![GitHub Logo](https://i.gyazo.com/70efd91ce9eca9038ccf210d7ee7ef76.png)
 ##### codesnippet
 ```javascript
 let dataGridOptions = {
@@ -136,9 +136,13 @@ let dataGridOptions = {
         var pdfDoc = new jsPDF();
         exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
             // cusomize cell
-            pdfCell.styles.lineWidth = 1;
+            pdfCell.styles.lineWidth = 0.3;
+            if (gridCell.rowType === 'header') {
+                pdfCell.styles.lineColor = [255, 255, 255];
+            }
             if (gridCell.rowType === 'data') {
                 pdfCell.styles.fillColor = [255, 87, 51];
+                pdfCell.styles.lineColor = [0, 0, 255];
                 pdfCell.styles.textColor = [0, 0, 255];
             }
         }).then(function () {
