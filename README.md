@@ -16,7 +16,7 @@
 
 ---
 
-#### Grouping
+## Grouping
 
 [example](https://github.com/KuznetsovVN/DevExtreme_DataGridToPDF/blob/master/demos/dxDataGrid/jsPDF_grouping.html) || [live](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_grouping.html)
 ##### screenshot
@@ -41,7 +41,7 @@ let dataGridOptions = {
 
 ---
 
-#### Summary
+## Summary
 
 [example](https://github.com/KuznetsovVN/DevExtreme_DataGridToPDF/blob/master/demos/dxDataGrid/jsPDF_summary.html) || [live](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_summary.html)
 ##### screenshot
@@ -74,7 +74,7 @@ let dataGridOptions = {
 
 ---
 
-#### Cell cusomization
+## Cell cusomization
 
 [example](https://github.com/KuznetsovVN/DevExtreme_DataGridToPDF/blob/master/demos/dxDataGrid/jsPDF_bands.html) || [live](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_bands.html)
 ##### screenshot
@@ -104,7 +104,7 @@ let dataGridOptions = {
 
 ---
 
-#### Cell template cusomization
+## Cell template cusomization
 
 [example](https://github.com/KuznetsovVN/DevExtreme_DataGridToPDF/blob/master/demos/dxDataGrid/jsPDF_custom_cell.html) || [live](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_custom_cell.html)
 ##### screenshot
