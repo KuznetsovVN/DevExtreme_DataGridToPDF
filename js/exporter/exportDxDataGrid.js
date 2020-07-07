@@ -60,7 +60,7 @@ var exportDataGrid = (function () {
                         }
 
                         // Get rowSpan & colSpan in header
-                        if (rowType === 'header' || rowType === 'totalFooter') {
+                        if (rowType === 'header') {
                             var mergedRange = tryGetMergeRange(rowIndex, cellIndex, mergedCells, dataProvider);
                             if (mergedRange && mergedRange.rowSpan > 0) {
                                 pdfCell.rowSpan = mergedRange.rowSpan + 1;
@@ -71,12 +71,19 @@ var exportDataGrid = (function () {
                         }
 
                         // Add header/footer/body row
-                        if (rowType === 'header' && pdfCell.content !== "") {
-                            headerRow.push(pdfCell);
+                        if(rowType === 'header') {
+                            if(pdfCell.content !== "")
+                                headerRow.push(pdfCell);
                         }
                         else if (rowType === 'totalFooter') {
                             pdfCell.content = pdfCell.content || '';
-                            footerRow.push(pdfCell);
+                            if (pdfCell.content !== "")
+                                footerRow.push(pdfCell);
+                            else {
+                                var last = footerRow[footerRow.length - 1];
+                                last.colSpan = last.colSpan || 1;
+                                last.colSpan += 1;
+                            }
                         }
                         else {
                             if (rowType === 'group') {
