@@ -81,37 +81,25 @@ let dataGridOptions = {
 let dataGridOptions = {
     onExporting: e => {
         var pdfDoc = new jsPDF('p', 'pt', 'a4');
-        var pdfAutotableConfig = {
-            didDrawCell: function (data) {
-                // check custom data
-                if (data.cell.raw.UserCustomization) {
-                    var obj = data.cell.raw.UserCustomization;
-                    var currentPos = data.cell.getTextPos();
-
-                    addSvgAsImage(pdfDoc, obj.svg, currentPos.x, currentPos.y, obj.width, obj.height);
-                    pdfDoc.text("svg", currentPos.x + obj.width, currentPos.y, { baseline: 'top' });
-                }
-            }
-        };
-
         exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
             // cusomize cell
             if (gridCell.column.dataField === 'Picture') {
                 if (gridCell.rowType === 'data') {
                     pdfCell.content = "";
-                    // set custom data
-                    pdfCell.UserCustomization = {
-                        svg: '<svg height="14" width="14">\n' +
+                    pdfCell.customDrawCell = function (data) {
+                        var svg = '<svg height="14" width="14">\n' +
                                 '  <circle cx="7" cy="7" r="4" stroke="blue" stroke-width="1" fill="red" />\n' +
                                 '  Sorry, your browser does not support inline SVG.  \n' +
-                                '</svg>',
-                        width: 14,
-                        height: 14
+                                '</svg>';
+
+                        var currentPos = data.cell.getTextPos();
+                        addSvgAsImage(pdfDoc, svg, currentPos.x, currentPos.y, 14, 14);
+                        pdfDoc.text("svg", currentPos.x + 14, currentPos.y, { baseline: 'top' });
                     };
                 }
             }
 
-        }, pdfAutotableConfig).then(function () {
+        }).then(function () {
             // advanced pdfDoc customization
         }).then(function () {
             pdfDoc.save("filePDF.pdf");
