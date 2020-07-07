@@ -45,7 +45,7 @@ let dataGridOptions = {
 
 [example](https://github.com/KuznetsovVN/DevExtreme_DataGridToPDF/blob/master/demos/dxDataGrid/jsPDF_summary.html) || [live](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_summary.html)
 ##### screenshot
-![GitHub Logo](https://i.gyazo.com/21a71e2af3733528d0b11f9ea601fbb4.png)
+![GitHub Logo](https://i.gyazo.com/2b3bb0de5fdc434533042c38423747c7.png)
 ##### codesnippet
 ```javascript
 let dataGridOptions = {
@@ -53,8 +53,6 @@ let dataGridOptions = {
         var pdfDoc = new jsPDF();
         exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
             // cusomize cell
-            pdfCell.styles.lineWidth = 0.3;
-
             if (gridCell.rowType === 'data' && gridCell.column.dataField === 'OrderDate') {
                 pdfCell.content = Globalize.formatDate(gridCell.value, { date: "short" })
             }
@@ -75,7 +73,7 @@ let dataGridOptions = {
 
 [example](https://github.com/KuznetsovVN/DevExtreme_DataGridToPDF/blob/master/demos/dxDataGrid/jsPDF_header_footer.html) || [live](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_header_footer.html)
 ##### screenshot
-![GitHub Logo](https://i.gyazo.com/81ebec8519eed3e0bf7d793225cb643c.png)
+![GitHub Logo](https://i.gyazo.com/2ab645e1078b8022609539f6238e7110.png)
 ##### codesnippet
 ```javascript
 let dataGridOptions = {
@@ -83,8 +81,6 @@ let dataGridOptions = {
         var pdfDoc = new jsPDF();
         exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
             // cusomize cell
-            pdfCell.styles.lineWidth = 0.3;
-
             if (gridCell.rowType === 'data' && gridCell.column.dataField === 'OrderDate') {
                 pdfCell.content = Globalize.formatDate(gridCell.value, { date: "short" })
             }
