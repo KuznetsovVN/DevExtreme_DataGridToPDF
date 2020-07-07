@@ -100,7 +100,7 @@ let dataGridOptions = {
                 if (gridCell.rowType === 'data') {
                     pdfCell.content = "";
                     // set custom data
-                    pdfCell.UserCustomization = pdfCell.UserCustomization = {
+                    pdfCell.UserCustomization = {
                         svg: '<svg height="14" width="14">\n' +
                                 '  <circle cx="7" cy="7" r="4" stroke="blue" stroke-width="1" fill="red" />\n' +
                                 '  Sorry, your browser does not support inline SVG.  \n' +
