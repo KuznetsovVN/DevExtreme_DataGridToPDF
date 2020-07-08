@@ -53,12 +53,15 @@
                 },
                 onExporting: function (e) {
                     var pdfDoc = new jsPDF();
+                    var pdfAutoTableConfig = {
+                        theme: 'grid'
+                    };
                     exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
                         // cusomize cell
                         if (gridCell.rowType === 'data' && gridCell.column.dataField === 'OrderDate') {
                             pdfCell.content = Globalize.formatDate(gridCell.value, { date: "short" })
                         }
-                    }).then(function () {
+                    }, pdfAutoTableConfig).then(function () {
                         // advanced pdfDoc customization
                     }).then(function () {
                         pdfDoc.save("filePDF.pdf");
@@ -80,9 +83,14 @@
                     dataField: "CustomerStoreCity"
                 }, {
                     caption: "State",
-                    dataField: "CustomerStoreState"
+                    dataField: "CustomerStoreState",
+                    groupIndex: 0
                 }, {
                     dataField: "SaleAmount",
+                    alignment: "right",
+                    format: "currency"
+                }, {
+                    dataField: "TotalAmount",
                     alignment: "right",
                     format: "currency"
                 }
@@ -101,6 +109,31 @@
                         column: "SaleAmount",
                         summaryType: "sum",
                         valueFormat: "currency"
+                    }, {
+                        column: "TotalAmount",
+                        summaryType: "sum",
+                        valueFormat: "currency"
+                    }],
+                    groupItems: [{
+                        column: "OrderNumber",
+                        summaryType: "count"
+                    }, {
+                        column: "OrderDate",
+                        summaryType: "min",
+                        customizeText: function (data) {
+                            return "First: " + Globalize.formatDate(data.value, { date: "medium" });
+                        }
+                    }, {
+                        column: "SaleAmount",
+                        summaryType: "sum",
+                        valueFormat: "currency",
+                        showInGroupFooter: false,
+                        alignByColumn: true
+                    }, {
+                        column: "TotalAmount",
+                        summaryType: "sum",
+                        valueFormat: "currency",
+                        showInGroupFooter: true
                     }]
                 }
             });

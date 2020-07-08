@@ -53,12 +53,15 @@
                 },
                 onExporting: function (e) {
                     var pdfDoc = new jsPDF();
+                    var pdfAutoTableConfig = {
+                        theme: 'grid'
+                    };
                     exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
                         // cusomize cell
                         if (gridCell.rowType === 'data' && gridCell.column.dataField === 'OrderDate') {
                             pdfCell.content = Globalize.formatDate(gridCell.value, { date: "short" })
                         }
-                    }).then(function () {
+                    }, pdfAutoTableConfig).then(function () {
                         // advanced pdfDoc customization
 
                         pdfDoc.setFontSize(12);

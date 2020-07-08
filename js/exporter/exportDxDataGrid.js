@@ -2,15 +2,21 @@ var exportDataGrid = (function () {
 
     function exportToPDF(pdfDoc, component, customizeCell, autoTableOptions) {
         const defaultAutoTableOptions = {
+            theme: 'plain',
             startY: 15
         };
-        autoTableOptions = autoTableOptions || defaultAutoTableOptions;
+        autoTableOptions = $.extend({}, defaultAutoTableOptions, autoTableOptions);
 
         const dataProvider = component.getDataProvider(component.getController("export")._selectionOnly);
 
-        var matrix = [];
+        var rowMatrix = [];
         var headerMatrix = [];
-        var footerMatrix = [];
+
+        var internalDrawMatrix = {
+            head: [],
+            body: [],
+            foot: []
+        };
 
         var customDrawMatrix = {
             head: [],
@@ -36,8 +42,8 @@ var exportDataGrid = (function () {
 
                 for (let rowIndex = 0; rowIndex < dataRowsCount; rowIndex++) {
                     var headerRow = [];
-                    var footerRow = [];
                     var row = [];
+                    var internalDrawCells = [];
                     var customDrawCells = [];
                     const styles = dataProvider.getStyles();
 
@@ -51,15 +57,10 @@ var exportDataGrid = (function () {
                             customDrawCell: null,
                             styles: {}
                         };
-
-                        // Customize cell Event
-                        if (customizeCell !== undefined) {
-                            customizeCell(pdfCell, cell);
-                            customDrawCells.push(pdfCell.customDrawCell);
-                            delete pdfCell.customDrawCell;
-                        }
+                        var internalDrawCell = null;
 
                         // Get rowSpan & colSpan in header
+
                         if (rowType === 'header') {
                             var mergedRange = tryGetMergeRange(rowIndex, cellIndex, mergedCells, dataProvider);
                             if (mergedRange && mergedRange.rowSpan > 0) {
@@ -70,40 +71,83 @@ var exportDataGrid = (function () {
                             }
                         }
 
-                        // Add header/footer/body row
-                        if(rowType === 'header') {
-                            if(pdfCell.content !== "")
-                                headerRow.push(pdfCell);
-                        }
-                        else if (rowType === 'totalFooter') {
+                        // ColSpans processing for rows
+
+                        if (rowType === 'group' || rowType === 'groupFooter' || rowType === 'totalFooter') {
                             pdfCell.content = pdfCell.content || '';
-                            if (pdfCell.content !== "")
-                                footerRow.push(pdfCell);
+                            if (pdfCell.content === "") {
+                                var last = row[row.length - 1];
+                                if (last) {
+                                    last.colSpan = last.colSpan || 1;
+                                    last.colSpan += 1;
+                                }
+                            }
+
+                            internalDrawCell = function (data) {
+                                var lineWidth = data.cell.styles.lineWidth;
+                                if (lineWidth > 0) {
+                                    var isFirst = data.column.index === 0;
+                                    if (!isFirst) {
+
+                                        var fillColor = data.cell.styles.fillColor;
+                                        var lineColor = data.cell.styles.lineColor;
+
+                                        var x = data.cursor.x;
+                                        var y = data.cursor.y;
+                                        var w = data.cell.width;
+                                        var h = data.cell.height;
+
+                                        data.doc.setDrawColor(fillColor);
+                                        data.doc.setFillColor(fillColor);
+                                        data.doc.rect(x - 0.2, y + lineWidth, 0.4, h - lineWidth * 2, "FD");
+
+                                        data.doc.setDrawColor(lineColor);
+                                        data.doc.line(x - 0.2, y, x + 0.2, y);
+                                        data.doc.line(x - 0.2, y + h, x + 0.2, y + h);
+                                    }
+                                }
+                            };
+                        }
+
+                        // Assing style from dxDataGrid
+
+                        //styles
+
+                        // Customize cell
+
+                        if (customizeCell !== undefined) {
+                            customizeCell(pdfCell, cell);
+                        }
+
+                        // Add cell to row
+
+                        if (pdfCell.content !== "") {
+                            if (rowType === 'header') {
+                                if (pdfCell.content !== "")
+                                    headerRow.push(pdfCell);
+                            }
                             else {
-                                var last = footerRow[footerRow.length - 1];
-                                last.colSpan = last.colSpan || 1;
-                                last.colSpan += 1;
+                                if (pdfCell.content !== "" || cellIndex === 0)
+                                    row.push(pdfCell);
                             }
                         }
-                        else {
-                            if (rowType === 'group') {
-                                pdfCell.colSpan = columns.length;
-                            }
-                            row.push(pdfCell);
-                        }
+
+                        internalDrawCells.push(internalDrawCell);
+                        customDrawCells.push(pdfCell.customDrawCell);
+                        delete pdfCell.customDrawCell;
                     }
+
+                    // Custom draw cell hooks
 
                     if (headerRow.length > 0) {
                         headerMatrix.push(headerRow);
+                        internalDrawMatrix['head'].push(internalDrawCells);
                         customDrawMatrix['head'].push(customDrawCells);
                     }
                     if (row.length > 0) {
-                        matrix.push(row);
+                        rowMatrix.push(row);
+                        internalDrawMatrix['body'].push(internalDrawCells);
                         customDrawMatrix['body'].push(customDrawCells);
-                    }
-                    if (footerRow.length > 0) {
-                        footerMatrix.push(footerRow);
-                        customDrawMatrix['foot'].push(customDrawCells);
                     }
                 }
 
@@ -113,12 +157,21 @@ var exportDataGrid = (function () {
             var pdfDocOptions = $.extend({},
                 {
                     head: headerMatrix,
-                    body: matrix,
-                    foot: footerMatrix,
+                    body: rowMatrix,
                     columnStyles: columnStyles,
                     didDrawCell: function (data) {
-                        var matrix = customDrawMatrix[data.row.section];
-                        var customDrawFunc = matrix[data.row.index][data.column.index];
+
+                        // Internal draw cell
+
+                        var internalMatrix = internalDrawMatrix[data.row.section];
+                        var internalDrawFunc = internalMatrix[data.row.index][data.column.index];
+                        if (internalDrawFunc)
+                            internalDrawFunc(data);
+
+                        // Custom draw cell
+
+                        var customMatrix = customDrawMatrix[data.row.section];
+                        var customDrawFunc = customMatrix[data.row.index][data.column.index];
                         if (customDrawFunc)
                             customDrawFunc(data);
                     }

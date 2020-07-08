@@ -45,6 +45,9 @@
                 },
                 onExporting: function (e) {
                     var pdfDoc = new jsPDF();
+                    var pdfAutoTableConfig = {
+                        theme: 'striped'
+                    };
                     exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
                         // cusomize cell
                         pdfCell.styles.lineWidth = 0.3;
@@ -56,7 +59,7 @@
                             pdfCell.styles.lineColor = [0, 0, 255];
                             pdfCell.styles.textColor = [0, 0, 255];
                         }
-                    }).then(function () {
+                    }, pdfAutoTableConfig).then(function () {
                         // advanced pdfDoc customization
                     }).then(function () {
                         pdfDoc.save("filePDF.pdf");
