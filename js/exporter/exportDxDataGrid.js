@@ -75,11 +75,14 @@ var exportDataGrid = (function () {
 
                         if (rowType === 'group' || rowType === 'groupFooter' || rowType === 'totalFooter') {
                             pdfCell.content = pdfCell.content || '';
-                            if (pdfCell.content === "") {
-                                var last = row[row.length - 1];
-                                if (last) {
-                                    last.colSpan = last.colSpan || 1;
-                                    last.colSpan += 1;
+
+                            if (rowType === 'group') {
+                                if (pdfCell.content === "") {
+                                    var last = row[row.length - 1];
+                                    if (last) {
+                                        last.colSpan = last.colSpan || 1;
+                                        last.colSpan += 1;
+                                    }
                                 }
                             }
 
@@ -99,11 +102,11 @@ var exportDataGrid = (function () {
 
                                         data.doc.setDrawColor(fillColor);
                                         data.doc.setFillColor(fillColor);
-                                        data.doc.rect(x - 0.2, y + lineWidth, 0.4, h - lineWidth * 2, "FD");
+                                        data.doc.rect(x - 0.3, y + lineWidth, 0.6, h - lineWidth * 2, "FD");
 
                                         data.doc.setDrawColor(lineColor);
-                                        data.doc.line(x - 0.2, y, x + 0.2, y);
-                                        data.doc.line(x - 0.2, y + h, x + 0.2, y + h);
+                                        data.doc.line(x - 0.3, y, x + 0.3, y);
+                                        data.doc.line(x - 0.3, y + h, x + 0.3, y + h);
                                     }
                                 }
                             };
@@ -121,14 +124,17 @@ var exportDataGrid = (function () {
 
                         // Add cell to row
 
-                        if (pdfCell.content !== "") {
-                            if (rowType === 'header') {
+                        if (rowType === 'header') {
+                            if (pdfCell.content !== "")
+                                headerRow.push(pdfCell);
+                        }
+                        else {
+                            if (rowType === 'group') {
                                 if (pdfCell.content !== "")
-                                    headerRow.push(pdfCell);
+                                    row.push(pdfCell);
                             }
                             else {
-                                if (pdfCell.content !== "" || cellIndex === 0)
-                                    row.push(pdfCell);
+                                row.push(pdfCell);
                             }
                         }
 
