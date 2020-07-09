@@ -40,12 +40,13 @@ var exportDataGrid = (function () {
                     columnStyles[i].cellWidth = 'auto';
                 }
 
+                const styles = dataProvider.getStyles();
+
                 for (let rowIndex = 0; rowIndex < dataRowsCount; rowIndex++) {
                     var headerRow = [];
                     var row = [];
                     var internalDrawCells = [];
                     var customDrawCells = [];
-                    const styles = dataProvider.getStyles();
 
                     for (let cellIndex = 0; cellIndex < columns.length; cellIndex++) {
                         const cellData = dataProvider.getCellData(rowIndex, cellIndex, true);
@@ -77,7 +78,7 @@ var exportDataGrid = (function () {
                             pdfCell.content = pdfCell.content || '';
 
                             if (rowType === 'group') {
-                                if (pdfCell.content === "") {
+                                if (pdfCell.content === "" && row.length === 1) {
                                     var last = row[row.length - 1];
                                     if (last) {
                                         last.colSpan = last.colSpan || 1;
@@ -87,26 +88,29 @@ var exportDataGrid = (function () {
                             }
 
                             internalDrawCell = function (data) {
-                                var lineWidth = data.cell.styles.lineWidth;
-                                if (lineWidth > 0) {
-                                    var isFirst = data.column.index === 0;
-                                    if (!isFirst) {
+                                var noTheme = data.settings.theme === 'plain';
+                                if (!noTheme) {
+                                    var lineWidth = data.cell.styles.lineWidth;
+                                    if (lineWidth > 0) {
+                                        var isFirst = data.column.index === 0;
+                                        if (!isFirst) {
 
-                                        var fillColor = data.cell.styles.fillColor;
-                                        var lineColor = data.cell.styles.lineColor;
+                                            var fillColor = data.cell.styles.fillColor;
+                                            var lineColor = data.cell.styles.lineColor;
 
-                                        var x = data.cursor.x;
-                                        var y = data.cursor.y;
-                                        var w = data.cell.width;
-                                        var h = data.cell.height;
+                                            var x = data.cursor.x;
+                                            var y = data.cursor.y;
+                                            var w = data.cell.width;
+                                            var h = data.cell.height;
 
-                                        data.doc.setDrawColor(fillColor);
-                                        data.doc.setFillColor(fillColor);
-                                        data.doc.rect(x - 0.3, y + lineWidth, 0.6, h - lineWidth * 2, "FD");
+                                            data.doc.setDrawColor(fillColor);
+                                            data.doc.setFillColor(fillColor);
+                                            data.doc.rect(x - 0.3, y + lineWidth, 0.6, h - lineWidth * 2, "FD");
 
-                                        data.doc.setDrawColor(lineColor);
-                                        data.doc.line(x - 0.3, y, x + 0.3, y);
-                                        data.doc.line(x - 0.3, y + h, x + 0.3, y + h);
+                                            data.doc.setDrawColor(lineColor);
+                                            data.doc.line(x - 0.3, y, x + 0.3, y);
+                                            data.doc.line(x - 0.3, y + h, x + 0.3, y + h);
+                                        }
                                     }
                                 }
                             };
@@ -115,6 +119,23 @@ var exportDataGrid = (function () {
                         // Assing style from dxDataGrid
 
                         //styles
+                        var style = styles[dataProvider.getStyleId(rowIndex, cellIndex)];
+                        if (style) {
+                            //debugger;
+                            if (style.alignment)
+                                pdfCell.styles.halign = style.alignment;
+                            if (style.bold)
+                                pdfCell.styles.fontStyle = 'bold';
+                            if (style.format) {
+                                // 
+                            }
+                            if (style.wrapText) {
+                                pdfCell.styles.cellWidth = 'wrap';
+                            }
+                            if (style.dataType) {
+                                // 
+                            }
+                        }
 
                         // Customize cell
 
