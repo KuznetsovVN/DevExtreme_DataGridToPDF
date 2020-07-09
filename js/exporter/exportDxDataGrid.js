@@ -16,6 +16,8 @@ var exportDataGrid = (function () {
         var rowMatrix = [];
         var headerMatrix = [];
 
+        var internalEndDrawPage;
+
         var internalDrawMatrix = {
             head: [],
             body: [],
@@ -101,10 +103,25 @@ var exportDataGrid = (function () {
                         // Assing style from dxDataGrid
 
                         if (autoTableOptions.useDxTheme) {
-                            customizeDxThemeCell(pdfCell, cell, { cellIndex: cellIndex, rowLength: columns.length, dxThemeConfig: getDxThemeConfig() });
+                            customizeDxThemeCell(
+                                pdfCell,
+                                cell,
+                                {
+                                    cellIndex: cellIndex,
+                                    rowLength: columns.length,
+                                    dxThemeConfig: getDxThemeConfig()
+                                }
+                            );
+
                             internalDrawCell = function (data) {
                                 drawDxThemeCell(data, {
                                     gridCell: cell,
+                                    dxThemeConfig: getDxThemeConfig()
+                                });
+                            };
+
+                            internalEndDrawPage = function (data) {
+                                endPageDxThemeCell(data, {
                                     dxThemeConfig: getDxThemeConfig()
                                 });
                             };
@@ -199,7 +216,7 @@ var exportDataGrid = (function () {
                         if (customDrawFunc)
                             customDrawFunc(data);
                     },
-                    didDrawPage: endPageDxThemeCell
+                    didDrawPage: internalEndDrawPage
                 },
                 autoTableOptions);
 
@@ -340,7 +357,7 @@ var exportDataGrid = (function () {
         }
     }
 
-    function endPageDxThemeCell(hookData) {
+    function endPageDxThemeCell(hookData, options) {
         var doc = hookData.doc;
         var margin = hookData.settings.margin;
         var pageSize = doc.internal.pageSize;
