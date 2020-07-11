@@ -19,9 +19,13 @@
 ## DataGrid Export to PDF
 
 [Simple](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_simple.html)
+
 [Grouping](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_grouping.html)
+
 [Summary](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_summary.html)
+
 [Bands](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_bands.html)
+
 
 ##### codesnippet
 ```javascript
@@ -40,7 +44,7 @@ let dataGridOptions = {
 
 ## Cell cusomization
 
-[Cell cusomization example](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_custom_cell.html)
+[Demo](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_custom_cell.html)
 
 ##### codesnippet
 ```javascript
@@ -48,6 +52,7 @@ let dataGridOptions = {
     onExporting: e => {
         var pdfDoc = new jsPDF('p', 'pt', 'a4');
         exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
+			// cusomize cell
             if (gridCell.rowType === 'data' && gridCell.data.ID === 3) {
                 pdfCell.styles.fillColor = [ 128, 255, 128];
             }
@@ -64,7 +69,7 @@ let dataGridOptions = {
 
 ## Cell template cusomization
 
-[Custom cell cusomization example](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_custom_cell_template.html)
+[Demo](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_custom_cell_template.html)
 
 ##### codesnippet
 ```javascript
@@ -100,7 +105,7 @@ let dataGridOptions = {
 
 ## Add Header and Footer
 
-[Custom cell cusomization example](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_header_footer.html)
+[Demo](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_header_footer.html)
 
 ##### codesnippet
 ```javascript
