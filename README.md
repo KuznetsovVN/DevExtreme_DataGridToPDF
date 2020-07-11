@@ -16,20 +16,41 @@
 
 ---
 
-## Grouping
+## DataGrid Export to PDF
 
-[example](https://github.com/KuznetsovVN/DevExtreme_DataGridToPDF/blob/master/demos/dxDataGrid/jsPDF_grouping.html) || [live](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_grouping.html)
-##### screenshot
-![GitHub Logo](https://i.gyazo.com/b1fe637d5cbf2f711bb96de2acc5ef53.png)
+[Simple](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_simple.html)
+[Grouping](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_grouping.html)
+[Summary](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_summary.html)
+[Bands](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_bands.html)
+
 ##### codesnippet
 ```javascript
 let dataGridOptions = {
     onExporting: e => {
-        var pdfDoc = new jsPDF();
+
+        var pdfDoc = new jsPDF('p', 'pt', 'a4');
+        exportDataGrid(pdfDoc, e.component).then(function () {
+            pdfDoc.save("filePDF.pdf");
+        });
+
+        e.cancel = true;
+    } 
+};  
+```
+
+## Cell cusomization
+
+[Cell cusomization example](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_custom_cell.html)
+
+##### codesnippet
+```javascript
+let dataGridOptions = {
+    onExporting: e => {
+        var pdfDoc = new jsPDF('p', 'pt', 'a4');
         exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
-            // cusomize cell
-        }).then(function () {
-            // advanced pdfDoc customization
+            if (gridCell.rowType === 'data' && gridCell.data.ID === 3) {
+                pdfCell.styles.fillColor = [ 128, 255, 128];
+            }
         }).then(function () {
             pdfDoc.save("filePDF.pdf");
         });
@@ -41,23 +62,31 @@ let dataGridOptions = {
 
 ---
 
-## Summary
+## Cell template cusomization
 
-[example](https://github.com/KuznetsovVN/DevExtreme_DataGridToPDF/blob/master/demos/dxDataGrid/jsPDF_summary.html) || [live](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_summary.html)
-##### screenshot
-![GitHub Logo](https://i.gyazo.com/2b3bb0de5fdc434533042c38423747c7.png)
+[Custom cell cusomization example](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_custom_cell_template.html)
+
 ##### codesnippet
 ```javascript
 let dataGridOptions = {
     onExporting: e => {
-        var pdfDoc = new jsPDF();
+        var pdfDoc = new jsPDF('p', 'pt', 'a4');
         exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
-            // cusomize cell
-            if (gridCell.rowType === 'data' && gridCell.column.dataField === 'OrderDate') {
-                pdfCell.content = Globalize.formatDate(gridCell.value, { date: "short" })
+            if (gridCell.column.dataField === 'Picture') {
+                if (gridCell.rowType === 'data') {
+                    pdfCell.content = "";
+                    pdfCell.customDrawCell = function (data) {
+                        var svg = '<svg height="14" width="14">\n' +
+                                '  <circle cx="7" cy="7" r="4" stroke="blue" stroke-width="1" fill="red" />\n' +
+                                '  Sorry, your browser does not support inline SVG.  \n' +
+                                '</svg>';
+
+                        var currentPos = data.cell.getTextPos();
+                        addSvgAsImage(pdfDoc, svg, currentPos.x, currentPos.y, 14, 14);
+                        pdfDoc.text("svg", currentPos.x + 14, currentPos.y, { baseline: 'top' });
+                    };
+                }
             }
-        }).then(function () {
-            // advanced pdfDoc customization
         }).then(function () {
             pdfDoc.save("filePDF.pdf");
         });
@@ -71,19 +100,16 @@ let dataGridOptions = {
 
 ## Add Header and Footer
 
-[example](https://github.com/KuznetsovVN/DevExtreme_DataGridToPDF/blob/master/demos/dxDataGrid/jsPDF_header_footer.html) || [live](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_header_footer.html)
-##### screenshot
-![GitHub Logo](https://i.gyazo.com/2ab645e1078b8022609539f6238e7110.png)
+[Custom cell cusomization example](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_header_footer.html)
+
 ##### codesnippet
 ```javascript
 let dataGridOptions = {
     onExporting: e => {
-        var pdfDoc = new jsPDF();
+        var pdfDoc = new jsPDF('p', 'pt', 'a4');
         exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
             // cusomize cell
-            if (gridCell.rowType === 'data' && gridCell.column.dataField === 'OrderDate') {
-                pdfCell.content = Globalize.formatDate(gridCell.value, { date: "short" })
-            }
+
         }).then(function () {
             // advanced pdfDoc customization
 
@@ -119,76 +145,3 @@ let dataGridOptions = {
 ```
 
 ---
-
-## Cell cusomization
-
-[example](https://github.com/KuznetsovVN/DevExtreme_DataGridToPDF/blob/master/demos/dxDataGrid/jsPDF_bands.html) || [live](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_bands.html)
-##### screenshot
-![GitHub Logo](https://i.gyazo.com/70efd91ce9eca9038ccf210d7ee7ef76.png)
-##### codesnippet
-```javascript
-let dataGridOptions = {
-    onExporting: e => {
-        var pdfDoc = new jsPDF();
-        exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
-            // cusomize cell
-            pdfCell.styles.lineWidth = 0.3;
-            if (gridCell.rowType === 'header') {
-                pdfCell.styles.lineColor = [255, 255, 255];
-            }
-            if (gridCell.rowType === 'data') {
-                pdfCell.styles.fillColor = [255, 87, 51];
-                pdfCell.styles.lineColor = [0, 0, 255];
-                pdfCell.styles.textColor = [0, 0, 255];
-            }
-        }).then(function () {
-            // advanced pdfDoc customization
-        }).then(function () {
-            pdfDoc.save("filePDF.pdf");
-        });
-
-        e.cancel = true;
-    } 
-};  
-```
-
----
-
-## Cell template cusomization
-
-[example](https://github.com/KuznetsovVN/DevExtreme_DataGridToPDF/blob/master/demos/dxDataGrid/jsPDF_custom_cell.html) || [live](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_custom_cell.html)
-##### screenshot
-![GitHub Logo](https://i.gyazo.com/733bca3d142855c14d85c7ea7559fe6c.png)
-##### codesnippet
-```javascript
-let dataGridOptions = {
-    onExporting: e => {
-        var pdfDoc = new jsPDF('p', 'pt', 'a4');
-        exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
-            // cusomize cell
-            if (gridCell.column.dataField === 'Picture') {
-                if (gridCell.rowType === 'data') {
-                    pdfCell.content = "";
-                    pdfCell.customDrawCell = function (data) {
-                        var svg = '<svg height="14" width="14">\n' +
-                                '  <circle cx="7" cy="7" r="4" stroke="blue" stroke-width="1" fill="red" />\n' +
-                                '  Sorry, your browser does not support inline SVG.  \n' +
-                                '</svg>';
-
-                        var currentPos = data.cell.getTextPos();
-                        addSvgAsImage(pdfDoc, svg, currentPos.x, currentPos.y, 14, 14);
-                        pdfDoc.text("svg", currentPos.x + 14, currentPos.y, { baseline: 'top' });
-                    };
-                }
-            }
-
-        }).then(function () {
-            // advanced pdfDoc customization
-        }).then(function () {
-            pdfDoc.save("filePDF.pdf");
-        });
-
-        e.cancel = true;
-    } 
-};  
-```

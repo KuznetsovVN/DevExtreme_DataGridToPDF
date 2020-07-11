@@ -47,11 +47,6 @@
                     var pdfDoc = new jsPDF();
                     exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
                         // cusomize cell
-
-                        if (gridCell.rowType === 'data' && gridCell.data.ID === 3) {
-                            pdfCell.styles.fillColor = [ 128, 255, 128];
-                        }
-
                     }).then(function () {
                         // advanced pdfDoc customization
                     }).then(function () {

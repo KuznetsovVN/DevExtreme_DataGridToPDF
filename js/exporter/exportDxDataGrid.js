@@ -1,5 +1,21 @@
 var exportDataGrid = (function () {
 
+    /*
+        customizeCell                   - Type callback   |   function(pdfCell, gridCell)
+        autoTableOptions: {
+            theme                       - Type: String
+            useDxTheme                  - Type: Boolean
+            styles                      - Type: StyleDef
+            headStyles                  - Type: StyleDef
+            bodyStyles                  - Type: StyleDef
+            footStyles                  - Type: StyleDef
+            groupStyles                 - Type: StyleDef
+            groupFooterStyles           - Type: StyleDef
+            totalFooterStyles           - Type: StyleDef
+            ...
+        }
+     */
+
     function exportToPDF(pdfDoc, component, customizeCell, autoTableOptions) {
         const defaultAutoTableOptions = {
             startY: 15
@@ -8,15 +24,13 @@ var exportDataGrid = (function () {
         autoTableOptions = $.extend({}, defaultAutoTableOptions, autoTableOptions);
 
         if (!autoTableOptions.theme) {
-            autoTableOptions = $.extend({}, autoTableOptions, getDxThemeStyles());
+            autoTableOptions = $.extend({}, autoTableOptions, getDxThemeOptions());
         }
 
         const dataProvider = component.getDataProvider(component.getController("export")._selectionOnly);
 
         var rowMatrix = [];
         var headerMatrix = [];
-
-        var internalEndDrawPage;
 
         var internalDrawMatrix = {
             head: [],
@@ -65,6 +79,7 @@ var exportDataGrid = (function () {
                             styles: {}
                         };
                         var internalDrawCell = null;
+                        var customDrawCell = null;
 
                         // Get rowSpan & colSpan in header
 
@@ -94,40 +109,46 @@ var exportDataGrid = (function () {
                             }
 
                             if (autoTableOptions.theme === 'grid') {
-                                internalDrawCell = function (data) {
-                                    patchBordersForGroupAndFooterCells(data);
+                                internalDrawCell = {
+                                    func: patchBordersForGroupAndFooterCells,
+                                    opts: {}
                                 };
                             }
                         }
 
-                        // Assing style from dxDataGrid
+                        // Customize cell
+
+                        if (customizeCell !== undefined) {
+                            customizeCell(pdfCell, cell);
+                            if (pdfCell.customDrawCell) {
+                                customDrawCell = {
+                                    func: pdfCell.customDrawCell,
+                                    opts: {}
+                                };
+                            }
+                            delete pdfCell.customDrawCell;
+                        }
+
+                        // DevExtreme styles processing
 
                         if (autoTableOptions.useDxTheme) {
-                            customizeDxThemeCell(
+                            internalPrepareCell(
                                 pdfCell,
                                 cell,
-                                {
-                                    cellIndex: cellIndex,
-                                    rowLength: columns.length,
-                                    dxThemeConfig: getDxThemeConfig()
-                                }
+                                rowIndex,
+                                cellIndex,
+                                columns.length,
+                                autoTableOptions
                             );
 
-                            internalDrawCell = function (data) {
-                                drawDxThemeCell(data, {
-                                    gridCell: cell,
-                                    dxThemeConfig: getDxThemeConfig()
-                                });
-                            };
-
-                            internalEndDrawPage = function (data) {
-                                endPageDxThemeCell(data, {
-                                    dxThemeConfig: getDxThemeConfig()
-                                });
+                            internalDrawCell = {
+                                func: drawDxThemeCell,
+                                opts: { pdfCell: pdfCell }
                             };
                         }
 
-                        //styles
+                       // Assing style from dxDataGrid
+
                         if (rowType === 'header') {
                             if (columns[cellIndex].alignment)
                                 pdfCell.styles.halign = columns[cellIndex].alignment;
@@ -139,22 +160,13 @@ var exportDataGrid = (function () {
                                     pdfCell.styles.halign = style.alignment;
                                 if (style.bold)
                                     pdfCell.styles.fontStyle = 'bold';
-                                if (style.format) {
-                                    // 
-                                }
                                 if (style.wrapText) {
                                     pdfCell.styles.cellWidth = 'wrap';
                                 }
-                                if (style.dataType) {
-                                    // 
+                                if (style.dataType === 'date') {
+                                    pdfCell.content = DevExpress.localization.formatDate(new Date(pdfCell.content), style.format);
                                 }
                             }
-                        }
-
-                        // Customize cell
-
-                        if (customizeCell !== undefined) {
-                            customizeCell(pdfCell, cell);
                         }
 
                         // Add cell to row
@@ -174,8 +186,7 @@ var exportDataGrid = (function () {
                         }
 
                         internalDrawCells.push(internalDrawCell);
-                        customDrawCells.push(pdfCell.customDrawCell);
-                        delete pdfCell.customDrawCell;
+                        customDrawCells.push(customDrawCell);
                     }
 
                     // Custom draw cell hooks
@@ -202,21 +213,22 @@ var exportDataGrid = (function () {
                     columnStyles: columnStyles,
                     didDrawCell: function (data) {
 
-                        // Internal draw cell
+                        if (data.row.index === -1 || data.column.index === -1)
+                            return;
 
-                        var internalMatrix = internalDrawMatrix[data.row.section];
-                        var internalDrawFunc = internalMatrix[data.row.index][data.column.index];
-                        if (internalDrawFunc)
-                            internalDrawFunc(data);
+                        // Internal draw cell
+                        var internalDrawSectionMatrix = internalDrawMatrix[data.row.section];
+                        var internalDrawCell = internalDrawSectionMatrix[data.row.index][data.column.index];
+                        if (internalDrawCell)
+                            internalDrawCell.func(data, internalDrawCell.opts);
 
                         // Custom draw cell
 
-                        var customMatrix = customDrawMatrix[data.row.section];
-                        var customDrawFunc = customMatrix[data.row.index][data.column.index];
-                        if (customDrawFunc)
-                            customDrawFunc(data);
-                    },
-                    didDrawPage: internalEndDrawPage
+                        var customDrawSectionMatrix = customDrawMatrix[data.row.section];
+                        var customDrawCell = customDrawSectionMatrix[data.row.index][data.column.index];
+                        if (customDrawCell)
+                            customDrawCell.func(data, customDrawCell.opts);
+                    }
                 },
                 autoTableOptions);
 
@@ -224,146 +236,148 @@ var exportDataGrid = (function () {
         });
     }
 
-    function getDxThemeConfig() {
-        return {
+    function getDxThemeOptions() {
 
-            styles: {
-                textColor: 51,
-                lineColor: 149,
-                lineWidth: 0.1
-            },
-            headCellStyles: {
-                fontStyle: 'normal',
-                textColor: 149,
-                minCellHeight: 8,
-                valign: 'bottom'
-            },
-            bodyCellStyles: {},
-            footCellStyles: {},
-            groupCellStyles: {},
-            groupFooterCellStyles: {},
-            totalFooterCellStyles: {
-                minCellHeight: 11,
-                valign: 'middle'
-            },
-            getTextColor: function (gridCell, cellIndex, rowLength) {
-                if (gridCell.rowType === 'group') {
-                    if (cellIndex === 0)
-                        return 149;
-                }
-                return undefined;
-            },
-            getFillColor: function (gridCell, cellIndex, rowLength, borderSide) {
-                if (gridCell.rowType === 'group')
-                    return 247;
-                return undefined;
-            },
-            getLineColor: function (gridCell, cellIndex, rowLength,  borderSide) {
-                return this.styles.lineColor;
-            },
-            getLineWidth: function (gridCell, cellIndex, rowLength, borderSide) {
-                if (['data', 'group', 'groupFooter', 'totalFooter'].some(t => t === gridCell.rowType)) {
-                    //var isFirst = cellIndex === 0;
-                    //var isLast = cellIndex === rowLength - 1;
+        var groupCellLineWidthsFunc = function (pdfCell, gridCell, rowIndex, cellIndex, rowLength) {
+            var isFirstCell = cellIndex === 0;
+            var isLastCell = cellIndex === rowLength - 1;
 
-                    //if (borderSide === 'left' || borderSide === 'right') {
-                    //    return 0;
-                    //}
-                    return 0;
-                }
+            var leftLineWidth = isFirstCell ? 0.1 : 0;
+            var topLineWidth = 0.1;
+            var rightLineWidth = isLastCell ? 0.1 : 0;
+            var bottomLineWidth = 0.1;
 
-                return undefined;
-            }
+            return [leftLineWidth, topLineWidth, rightLineWidth, bottomLineWidth];
         };
-    }
 
-    function getDxThemeStyles() {
-        var config = getDxThemeConfig();
         return {
             theme: 'plain',
             useDxTheme: true,
-            styles: $.extend({}, config.styles),
-            headStyles: $.extend({}, config.headCellStyles),
-            bodyStyles: $.extend({}, config.bodyCellStyles),
-            footStyles: $.extend({}, config.footCellStyles)
+            tableLineWidth: 0.1,
+            startY: 14.2,
+            styles: {
+                textColor: 51,
+                lineColor: 149,
+                lineWidth: 0
+            },
+            headStyles: {
+                fontStyle: 'normal',
+                textColor: 149,
+                lineWidth: 0.1
+            },
+            bodyStyles: {
+                lineWidths: [0.1, 0]
+            },
+            footStyles: {
+                lineWidth: 0.1
+            },
+            groupStyles: {
+                fillColor: 247,
+                getLineWidths: groupCellLineWidthsFunc
+            },
+            groupFooterStyles: {
+                getLineWidths: groupCellLineWidthsFunc
+            },
+            totalFooterStyles: {
+                minCellHeight: 11,
+                valign: 'middle',
+                getLineWidths: groupCellLineWidthsFunc
+            }
         };
     }
 
-    function customizeDxThemeCell(pdfCell, gridCell, options) {
-        var config = options.dxThemeConfig;
+    function internalPrepareCell(pdfCell, gridCell, rowIndex, cellIndex, rowLength, options) {
+        var rowType = gridCell.rowType;
 
-        var configStyles = {
-            group: config.groupCellStyles,
-            groupFooter: config.groupFooterCellStyles,
-            totalFooter: config.totalFooterCellStyles
-        };
+        if (rowType === 'header')
+            rowType = 'head';
 
-        if (configStyles[gridCell.rowType])
-            pdfCell.styles = $.extend({}, pdfCell.styles, configStyles[gridCell.rowType]);
+        if (rowType === 'data')
+            rowType = 'body';
 
+        if (rowType === 'footer')
+            rowType = 'foot';
 
-        var dynamicStyles = {
-            textColor: config.getTextColor(gridCell, options.cellIndex, options.rowLength),
-            fillColor: config.getFillColor(gridCell, options.cellIndex, options.rowLength),
-            lineWidth: config.getLineWidth(gridCell, options.cellIndex, options.rowLength)
-        };
+        pdfCell.styles = $.extend({}, options.styles, options[rowType + 'Styles'], pdfCell.styles);
 
-        if (dynamicStyles.textColor !== undefined)
-            pdfCell.styles.textColor = dynamicStyles.textColor;
+        // try extend dynamic styles
 
-        if (dynamicStyles.fillColor !== undefined)
-            pdfCell.styles.fillColor = dynamicStyles.fillColor;
+        var funcs = Object.getOwnPropertyNames(pdfCell.styles).filter(function (p) {
+            return typeof pdfCell.styles[p] === 'function';
+        });
 
-        if (dynamicStyles.lineWidth !== undefined)
-            pdfCell.styles.lineWidth = dynamicStyles.lineWidth;
-    }
-
-    function drawDxThemeCell(hookData, options) {
-        if (['data', 'group', 'groupFooter', 'totalFooter'].some(t => t === options.gridCell.rowType)) {
-            var doc = hookData.doc;
-            var cell = hookData.cell;
-
-            var prevLineColor = doc.getDrawColor();
-            var lineColor = options.dxThemeConfig.getLineColor(options.gridCell, hookData.column.index, hookData.row.raw.length);
-            doc.setDrawColor(lineColor);
-
-            if (options.gridCell.rowType === 'data') {
-                // left border
-                doc.line(cell.x, cell.y, cell.x, cell.y + cell.height);
-
-                // right border
-                doc.line(cell.x + cell.width, cell.y, cell.x + cell.width, cell.y + cell.height);
+        for (var i = 0; i < funcs.length; i++) {
+            var funcName = funcs[i];
+            if (funcName.startsWith("get")) {
+                var propName = funcName.substring(3);
+                propName = propName.charAt(0).toLowerCase() + propName.slice(1);
+                pdfCell.styles[propName] = pdfCell.styles[funcName](pdfCell, gridCell, rowIndex, cellIndex, rowLength);
             }
-            else {
-                var isFirstCell = hookData.cell.raw === hookData.row.raw[0];
-                var isLastCell = hookData.cell.raw === hookData.row.raw[hookData.row.raw.length - 1];
+        }
 
-                // left border
-                if (isFirstCell)
-                    doc.line(cell.x, cell.y, cell.x, cell.y + cell.height);
+        // remove common if has specific
 
-                // right border
-                if (isLastCell)
-                    doc.line(cell.x + cell.width, cell.y, cell.x + cell.width, cell.y + cell.height);
+        var lineColors = pdfCell.styles.lineColors;
+        var lineWidths = pdfCell.styles.lineWidths;
 
-                // top border
-                doc.line(cell.x, cell.y, cell.x + cell.width, cell.y);
+        if (lineColors && Array.isArray(lineColors)) {
+            if (pdfCell.styles.hasOwnProperty('lineColor'))
+                delete pdfCell.styles['lineColor'];
+        }
 
-                // bottom border
-                doc.line(cell.x, cell.y + cell.height, cell.x + cell.width, cell.y + cell.height);
-            }
-
-            doc.setDrawColor(prevLineColor);
+        if (lineWidths && Array.isArray(lineWidths)) {
+            if (pdfCell.styles.hasOwnProperty('lineWidth'))
+                delete pdfCell.styles['lineWidth'];
         }
     }
 
-    function endPageDxThemeCell(hookData, options) {
-        var doc = hookData.doc;
-        var margin = hookData.settings.margin;
-        var pageSize = doc.internal.pageSize;
-        var pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth();
+    function drawDxThemeCell(hookData, opts) {
+        var pdfCell = opts.pdfCell;
 
-        doc.line(margin.left, hookData.cursor.y, pageWidth - margin.right, hookData.cursor.y);
+        // if own styles: lineWidths
+
+        var doc = hookData.doc;
+        var cell = hookData.cell;
+
+        var prevLineColor = doc.getDrawColor();
+
+        var lineWidths = pdfCell.styles.lineWidths;
+        var lineColors = pdfCell.styles.lineColors || [pdfCell.styles.lineColor];
+
+        if (lineWidths && Array.isArray(lineWidths)) {
+            var widths = toRect(lineWidths);
+            var colors = toRect(lineColors);
+
+            // left border
+            if (widths.left > 0) {
+                if (colors.left)
+                    setDrawColor(doc, colors.left);
+                doc.line(cell.x, cell.y, cell.x, cell.y + cell.height);
+            }
+
+            // top border
+            if (widths.top > 0) {
+                if (colors.top)
+                    setDrawColor(doc, colors.top);
+                doc.line(cell.x, cell.y, cell.x + cell.width, cell.y);
+            }
+
+            // right border
+            if (widths.right > 0) {
+                if (colors.right)
+                    setDrawColor(doc, colors.right);
+                doc.line(cell.x + cell.width, cell.y, cell.x + cell.width, cell.y + cell.height);
+            }
+
+            // bottom border
+            if (widths.bottom > 0) {
+                if (colors.buttom)
+                    setDrawColor(doc, colors.buttom);
+                doc.line(cell.x, cell.y + cell.height, cell.x + cell.width, cell.y + cell.height);
+            }
+
+            setDrawColor(doc, prevLineColor);
+        }
     }
 
     function patchBordersForGroupAndFooterCells(hookData) {
@@ -382,15 +396,15 @@ var exportDataGrid = (function () {
             if (!isFirst) {
                 var prevLineColor = doc.getDrawColor();
 
-                doc.setDrawColor(fillColor);
-                doc.setFillColor(fillColor);
+                setDrawColor(doc, fillColor);
+                setFillColor(doc, fillColor);
                 doc.rect(cursor.x - 0.3, cursor.y + lineWidth, 0.6, cell.height - lineWidth * 2, "FD");
 
-                doc.setDrawColor(lineColor);
+                setDrawColor(doc, lineColor);
                 doc.line(cursor.x - 0.3, cursor.y, cursor.x + 0.3, cursor.y);
                 doc.line(cursor.x - 0.3, cursor.y + cell.height, cursor.x + 0.3, cursor.y + cell.height);
 
-                doc.setDrawColor(prevLineColor);
+                setDrawColor(doc, prevLineColor);
             }
         }
     }
@@ -410,6 +424,57 @@ var exportDataGrid = (function () {
                 return { rowSpan: cellMerge.rowspan, colSpan: cellMerge.colspan };
             }
         }
+    }
+
+    function tryGetPropNameFunc(stylesObj, propName, pdfCell, gridCell, rowIndex, cellIndex, rowLength) {
+        var funcName = 'get' + propName.charAt(0).toUpperCase() + propName.substring(1);
+        if (stylesObj[funcName] && typeof stylesObj[funcName] === 'function')
+            return stylesObj[funcName](pdfCell, gridCell, rowIndex, cellIndex, rowLength);
+        return undefined;
+    }
+
+    // Utility
+
+    function toRect(value) {
+        if (Array.isArray(value)) {
+            if (value.length === 1)
+                return { left: value[0], top: value[0], right: value[0], bottom: value[0] };
+
+            if (value.length === 2) {
+                return { left: value[0], top: value[1], right: value[0], bottom: value[1] };
+            }
+
+            if (value.length === 3) {
+                return { left: value[0], top: value[1], right: value[2], bottom: value[1] };
+            }
+
+            if (value.length === 4) {
+                return { left: value[0], top: value[1], right: value[2], bottom: value[3] };
+            }
+        }
+        else
+            return { left: value, top: value, right: value, bottom: value };
+    }
+
+    function setDrawColor(doc, color) {
+        if (Array.isArray(color))
+            doc.setDrawColor(color[0], color[1], color[2]);
+        else
+            doc.setDrawColor(color);
+    }
+
+    function setFillColor(doc, color) {
+        if (Array.isArray(color))
+            doc.setFillColor(color[0], color[1], color[2]);
+        else
+            doc.setFillColor(color);
+    }
+
+    function setTextColor(doc, color) {
+        if (Array.isArray(color))
+            doc.setTextColor(color[0], color[1], color[2]);
+        else
+            doc.setTextColor(color);
     }
 
     return exportToPDF;

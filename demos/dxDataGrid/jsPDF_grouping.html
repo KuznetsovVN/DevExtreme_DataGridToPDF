@@ -45,12 +45,9 @@
                 },
                 onExporting: function (e) {
                     var pdfDoc = new jsPDF();
-                    var pdfAutoTableConfig = {
-                        theme: 'grid'
-                    };
                     exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
                         // cusomize cell
-                    }, pdfAutoTableConfig).then(function () {
+                    }).then(function () {
                         // advanced pdfDoc customization
                     }).then(function () {
                         pdfDoc.save("filePDF.pdf");

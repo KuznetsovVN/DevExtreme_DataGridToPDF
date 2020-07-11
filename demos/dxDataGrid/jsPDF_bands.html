@@ -45,21 +45,18 @@
                 },
                 onExporting: function (e) {
                     var pdfDoc = new jsPDF();
-                    var pdfAutoTableConfig = {
-                        theme: 'striped'
-                    };
                     exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
                         // cusomize cell
-                        pdfCell.styles.lineWidth = 0.3;
-                        if (gridCell.rowType === 'header') {
-                            pdfCell.styles.lineColor = [255, 255, 255];
-                        }
-                        if (gridCell.rowType === 'data') {
-                            pdfCell.styles.fillColor = [255, 87, 51];
-                            pdfCell.styles.lineColor = [0, 0, 255];
-                            pdfCell.styles.textColor = [0, 0, 255];
-                        }
-                    }, pdfAutoTableConfig).then(function () {
+                        //pdfCell.styles.lineWidth = 0.3;
+                        //if (gridCell.rowType === 'header') {
+                        //    pdfCell.styles.lineColor = [255, 255, 255];
+                        //}
+                        //if (gridCell.rowType === 'data') {
+                        //    pdfCell.styles.fillColor = [255, 87, 51];
+                        //    pdfCell.styles.lineColor = [0, 0, 255];
+                        //    pdfCell.styles.textColor = [0, 0, 255];
+                        //}
+                    }).then(function () {
                         // advanced pdfDoc customization
                     }).then(function () {
                         pdfDoc.save("filePDF.pdf");

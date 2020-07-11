@@ -58,9 +58,6 @@
                     };
                     exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
                         // cusomize cell
-                        if (gridCell.rowType === 'data' && gridCell.column.dataField === 'OrderDate') {
-                            pdfCell.content = Globalize.formatDate(gridCell.value, { date: "short" })
-                        }
                     }, pdfAutoTableConfig).then(function () {
                         // advanced pdfDoc customization
                     }).then(function () {
