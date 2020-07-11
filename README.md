@@ -77,6 +77,7 @@ let dataGridOptions = {
     onExporting: e => {
         var pdfDoc = new jsPDF('p', 'pt', 'a4');
         exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
+			// cusomize cell
             if (gridCell.column.dataField === 'Picture') {
                 if (gridCell.rowType === 'data') {
                     pdfCell.content = "";
