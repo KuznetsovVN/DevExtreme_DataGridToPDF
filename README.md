@@ -16,7 +16,7 @@
 
 ---
 
-Check out the [playground]((https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/playground.html) and [examples](https://github.com/KuznetsovVN/DevExtreme_DataGridToPDF/tree/master/demos/dxDataGrid/jsPDF).
+Check out the [playground](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/playground.html) and [examples](https://github.com/KuznetsovVN/DevExtreme_DataGridToPDF/tree/master/demos/dxDataGrid/jsPDF).
 
 ---
 
