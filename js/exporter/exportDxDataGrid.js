@@ -24,7 +24,10 @@ var exportDataGrid = (function () {
         autoTableOptions = $.extend({}, defaultAutoTableOptions, autoTableOptions);
 
         if (!autoTableOptions.theme) {
-            autoTableOptions = $.extend({}, autoTableOptions, getDxThemeOptions());
+            autoTableOptions = $.extend({}, getDxThemeOptions(), autoTableOptions);
+
+            // BUG in an AutoTable
+            autoTableOptions.startY = 14.2;
         }
 
         const dataProvider = component.getDataProvider(component.getController("export")._selectionOnly);
@@ -238,7 +241,7 @@ var exportDataGrid = (function () {
 
     function getDxThemeOptions() {
 
-        var groupCellTextColor = function (pdfCell, gridCell, rowIndex, cellIndex, rowLength) {
+        var groupCellTextColorFunc = function (pdfCell, gridCell, rowIndex, cellIndex, rowLength) {
             if(cellIndex === 0)
                 return 149;
             return 51;
@@ -260,7 +263,6 @@ var exportDataGrid = (function () {
             theme: 'plain',
             useDxTheme: true,
             tableLineWidth: 0.1,
-            startY: 14.2,
             styles: {
                 textColor: 51,
                 lineColor: 149,
@@ -279,7 +281,7 @@ var exportDataGrid = (function () {
             },
             groupStyles: {
                 fillColor: 247,
-                getTextColor: groupCellTextColor,
+                getTextColor: groupCellTextColorFunc,
                 getLineWidths: groupCellLineWidthsFunc
             },
             groupFooterStyles: {
