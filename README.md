@@ -56,7 +56,7 @@ let dataGridOptions = {
             },
             tableWidth: 300,
             tableLineWidth: 0.1,
-			tableLineColor: [128, 128, 128]
+            tableLineColor: [128, 128, 128]
             // ...
         };
 
