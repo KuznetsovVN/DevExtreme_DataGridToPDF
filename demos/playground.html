@@ -10,6 +10,12 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.2/jszip.min.js"></script>
     <script type="text/javascript" src="https://cdn3.devexpress.com/jslib/20.1.4/js/dx.all.js"></script>
 
+    <style>
+        .selected {
+            background-color: #00ff00;
+        }
+    </style>
+
 </head>
 <body>
 
@@ -18,7 +24,7 @@
             <tr>
                 <td style="background: #eeeeee; width: 300px;" valign="top">
                     <ul id="ul_list">
-                        <li><a href="#" data="dxDataGrid/jsPDF/simple.html">Simple</a></li>
+                        <li><a class="selected" href="#" data="dxDataGrid/jsPDF/simple.html">Simple</a></li>
                         <li><a href="#" data="dxDataGrid/jsPDF/grouping.html">Grouping</a></li>
                         <li><a href="#" data="dxDataGrid/jsPDF/bands.html">Bands</a></li>
                         <li><a href="#" data="dxDataGrid/jsPDF/summary.html">Summary</a></li>
@@ -44,7 +50,10 @@
             var items = $('#ul_list').find('a');
             $.each(items, function (index, value) {
                 $(value).click(function (e) {
-                    document.getElementById('iFrame1').src = $(e.target).attr('data');
+                    $('#ul_list').find('a').removeClass('selected');
+                    var elem = $(e.target);
+                    elem.addClass('selected');
+                    document.getElementById('iFrame1').src = elem.attr('data');
                 });
             });
         });
