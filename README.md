@@ -49,19 +49,19 @@ let dataGridOptions = {
 
         var pdfDoc = new jsPDF('p', 'pt', 'a4');
 
-		var options = {
-			margin: {
-				top: 15,
-				left: 15
-			},
-			tableWidth: 300,
-			// ...
-		};
+        var options = {
+            margin: {
+                top: 15,
+                left: 15
+            },
+            tableWidth: 300,
+            // ...
+        };
 
         exportDataGrid(pdfDoc, e.component, null, options)
-			.then(function () {
-				pdfDoc.save("filePDF.pdf");
-			});
+            .then(function () {
+                pdfDoc.save("filePDF.pdf");
+            });
 
         e.cancel = true;
     } 
@@ -79,16 +79,16 @@ let dataGridOptions = {
 
         var pdfDoc = new jsPDF('p', 'pt', 'a4');
 
-		var customizeCell = function(pdfCell, gridCell) {
-			if (gridCell.rowType === 'data' && gridCell.data.ID === 3) {
+        var customizeCell = function(pdfCell, gridCell) {
+            if (gridCell.rowType === 'data' && gridCell.data.ID === 3) {
                 pdfCell.styles.fillColor = [ 128, 255, 128];
             }
-		};
+        };
 
         exportDataGrid(pdfDoc, e.component, customizeCell)
-			.then(function () {
-				pdfDoc.save("filePDF.pdf");
-			});
+            .then(function () {
+                pdfDoc.save("filePDF.pdf");
+            });
 
         e.cancel = true;
     } 
@@ -106,8 +106,8 @@ let dataGridOptions = {
 
         var pdfDoc = new jsPDF('p', 'pt', 'a4');
 
-		var customizeCell = function(pdfCell, gridCell) {
-			if (gridCell.column.dataField === 'Picture') {
+        var customizeCell = function(pdfCell, gridCell) {
+            if (gridCell.column.dataField === 'Picture') {
                 if (gridCell.rowType === 'data') {
                     pdfCell.content = "";
                     pdfCell.customDrawCell = function (data) {
@@ -122,12 +122,12 @@ let dataGridOptions = {
                     };
                 }
             }
-		};
+        };
 
         exportDataGrid(pdfDoc, e.component, customizeCell)
-			.then(function () {
-				pdfDoc.save("filePDF.pdf");
-			});
+            .then(function () {
+                pdfDoc.save("filePDF.pdf");
+            });
 
         e.cancel = true;
     } 
