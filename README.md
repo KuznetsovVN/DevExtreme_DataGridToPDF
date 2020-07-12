@@ -16,16 +16,11 @@
 
 ---
 
-## DataGrid Export to PDF
+Check out the [playground]((https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/playground.html) and [examples](https://github.com/KuznetsovVN/DevExtreme_DataGridToPDF/tree/master/demos/dxDataGrid/jsPDF).
 
-[Simple](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_simple.html)
+---
 
-[Grouping](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_grouping.html)
-
-[Summary](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_summary.html)
-
-[Bands](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_bands.html)
-
+## How to use
 
 ##### codesnippet
 ```javascript
@@ -33,30 +28,8 @@ let dataGridOptions = {
     onExporting: e => {
 
         var pdfDoc = new jsPDF('p', 'pt', 'a4');
+
         exportDataGrid(pdfDoc, e.component).then(function () {
-            pdfDoc.save("filePDF.pdf");
-        });
-
-        e.cancel = true;
-    } 
-};  
-```
-
-## Cell cusomization
-
-[Demo](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_custom_cell.html)
-
-##### codesnippet
-```javascript
-let dataGridOptions = {
-    onExporting: e => {
-        var pdfDoc = new jsPDF('p', 'pt', 'a4');
-        exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
-			// cusomize cell
-            if (gridCell.rowType === 'data' && gridCell.data.ID === 3) {
-                pdfCell.styles.fillColor = [ 128, 255, 128];
-            }
-        }).then(function () {
             pdfDoc.save("filePDF.pdf");
         });
 
@@ -67,18 +40,74 @@ let dataGridOptions = {
 
 ---
 
-## Cell template cusomization
-
-[Demo](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_custom_cell_template.html)
+## How to cusomize a table
 
 ##### codesnippet
 ```javascript
 let dataGridOptions = {
     onExporting: e => {
+
         var pdfDoc = new jsPDF('p', 'pt', 'a4');
-        exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
-			// cusomize cell
-            if (gridCell.column.dataField === 'Picture') {
+
+		var options = {
+			margin: {
+				top: 15,
+				left: 15
+			},
+			tableWidth: 300,
+			// ...
+		};
+
+        exportDataGrid(pdfDoc, e.component, null, options)
+			.then(function () {
+				pdfDoc.save("filePDF.pdf");
+			});
+
+        e.cancel = true;
+    } 
+};  
+```
+
+---
+
+## How to cusomize a table cell
+
+##### codesnippet
+```javascript
+let dataGridOptions = {
+    onExporting: e => {
+
+        var pdfDoc = new jsPDF('p', 'pt', 'a4');
+
+		var customizeCell = function(pdfCell, gridCell) {
+			if (gridCell.rowType === 'data' && gridCell.data.ID === 3) {
+                pdfCell.styles.fillColor = [ 128, 255, 128];
+            }
+		};
+
+        exportDataGrid(pdfDoc, e.component, customizeCell)
+			.then(function () {
+				pdfDoc.save("filePDF.pdf");
+			});
+
+        e.cancel = true;
+    } 
+};  
+```
+
+---
+
+## How to change cell contents
+
+##### codesnippet
+```javascript
+let dataGridOptions = {
+    onExporting: e => {
+
+        var pdfDoc = new jsPDF('p', 'pt', 'a4');
+
+		var customizeCell = function(pdfCell, gridCell) {
+			if (gridCell.column.dataField === 'Picture') {
                 if (gridCell.rowType === 'data') {
                     pdfCell.content = "";
                     pdfCell.customDrawCell = function (data) {
@@ -93,57 +122,12 @@ let dataGridOptions = {
                     };
                 }
             }
-        }).then(function () {
-            pdfDoc.save("filePDF.pdf");
-        });
+		};
 
-        e.cancel = true;
-    } 
-};  
-```
-
----
-
-## Add Header and Footer
-
-[Demo](https://kuznetsovvn.github.io/DevExtreme_DataGridToPDF/demos/dxDataGrid/jsPDF_header_footer.html)
-
-##### codesnippet
-```javascript
-let dataGridOptions = {
-    onExporting: e => {
-        var pdfDoc = new jsPDF('p', 'pt', 'a4');
-        exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
-            // cusomize cell
-
-        }).then(function () {
-            // advanced pdfDoc customization
-
-            pdfDoc.setFontSize(12);
-            const pageCount = pdfDoc.internal.getNumberOfPages();
-            for (var i = 1; i <= pageCount; i++) {
-                var odd = (i % 2) > 0;
-
-                pdfDoc.setPage(i);
-                var pageSize = pdfDoc.internal.pageSize;
-                var pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth();
-                var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight();
-
-                var header = "Export DatGrid to PDF";
-                var footer = 'Page ' + String(i) + ' of ' + String(pageCount);
-
-                // Header
-                pdfDoc.text(header, 15, 5, { baseline: 'top' });
-
-                // Footer
-                if (odd)
-                    pdfDoc.text(footer, pageWidth - (pdfDoc.getTextWidth(footer) + 15), pageHeight - 12, { baseline: 'top' });
-                else
-                    pdfDoc.text(footer, 15, pageHeight - 12, { baseline: 'top' });
-            }
-        }).then(function () {
-            pdfDoc.save("filePDF.pdf");
-        });
+        exportDataGrid(pdfDoc, e.component, customizeCell)
+			.then(function () {
+				pdfDoc.save("filePDF.pdf");
+			});
 
         e.cancel = true;
     } 

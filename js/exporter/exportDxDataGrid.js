@@ -118,7 +118,7 @@ var exportDataGrid = (function () {
 
                         // Customize cell
 
-                        if (customizeCell !== undefined) {
+                        if (customizeCell) {
                             customizeCell(pdfCell, cell);
                             if (pdfCell.customDrawCell) {
                                 customDrawCell = {
@@ -238,6 +238,12 @@ var exportDataGrid = (function () {
 
     function getDxThemeOptions() {
 
+        var groupCellTextColor = function (pdfCell, gridCell, rowIndex, cellIndex, rowLength) {
+            if(cellIndex === 0)
+                return 149;
+            return 51;
+        };
+
         var groupCellLineWidthsFunc = function (pdfCell, gridCell, rowIndex, cellIndex, rowLength) {
             var isFirstCell = cellIndex === 0;
             var isLastCell = cellIndex === rowLength - 1;
@@ -273,12 +279,15 @@ var exportDataGrid = (function () {
             },
             groupStyles: {
                 fillColor: 247,
+                getTextColor: groupCellTextColor,
                 getLineWidths: groupCellLineWidthsFunc
             },
             groupFooterStyles: {
+                textColor: 51,
                 getLineWidths: groupCellLineWidthsFunc
             },
             totalFooterStyles: {
+                textColor: 51,
                 minCellHeight: 11,
                 valign: 'middle',
                 getLineWidths: groupCellLineWidthsFunc

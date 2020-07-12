@@ -15,10 +15,10 @@
 
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.6/jspdf.plugin.autotable.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvg/1.5/canvg.js"></script>
 
-    <script type="text/javascript" src="../../data/employees.js"></script>
-    <script type="text/javascript" src="../../js/exporter/exportDxDataGrid.js"></script>
+    <script type="text/javascript" src="../../../data/employees.js"></script>
+    <script type="text/javascript" src="../../../js/exporter/exportDxDataGrid.js"></script>
+
 </head>
 <body>
 
@@ -28,18 +28,6 @@
 
     <script>
         $(function () {
-            function addSvgAsImage(doc, svg, x, y, w, h) {
-                var canvas = document.createElement('canvas');
-                canvas.height = 14;
-                canvas.width = 14;
-                var context = canvas.getContext('2d');
-                context.clearRect(0, 0, canvas.width, canvas.height);
-                canvg(canvas, svg);
-                var imgData = canvas.toDataURL('image/png');
-                doc.addImage(imgData, 'PNG', x, y, w, h);
-            }
-
-
             $('#DataGrid').dxDataGrid({
                 dataSource: employees,
                 showBorders: true,
@@ -56,29 +44,15 @@
                     allowExportSelectedData: true
                 },
                 onExporting: function (e) {
-                    var pdfDoc = new jsPDF('p', 'pt', 'a4');
-                    var pdfConfig = {
-                        //theme: 'grid'
-                    };
+                    var pdfDoc = new jsPDF();
                     exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
                         // cusomize cell
-                        if (gridCell.column.dataField === 'Picture') {
-                            if (gridCell.rowType === 'data') {
-                                pdfCell.content = "";
-                                pdfCell.customDrawCell = function (data) {
-                                    var svg = '<svg height="14" width="14">\n' +
-                                            '  <circle cx="7" cy="7" r="4" stroke="blue" stroke-width="1" fill="red" />\n' +
-                                            '  Sorry, your browser does not support inline SVG.  \n' +
-                                            '</svg>';
 
-                                    var currentPos = data.cell.getTextPos();
-                                    addSvgAsImage(pdfDoc, svg, currentPos.x, currentPos.y, 14, 14);
-                                    pdfDoc.text("svg", currentPos.x + 14, currentPos.y, { baseline: 'top' });
-                                };
-                            }
+                        if (gridCell.rowType === 'data' && gridCell.data.ID === 3) {
+                            pdfCell.styles.fillColor = [ 128, 255, 128];
                         }
 
-                    }, pdfConfig).then(function () {
+                    }).then(function () {
                         // advanced pdfDoc customization
                     }).then(function () {
                         pdfDoc.save("filePDF.pdf");
@@ -90,15 +64,10 @@
                     'FirstName',
                     'LastName',
                     'City',
+                    'State',
                     {
-                        dataField: 'State',
-                        groupIndex: 0
-                    }, {
                         dataField: 'Position',
                         width: 130
-                    }, {
-                        dataField: 'Picture',
-                        width: 120
                     }
                 ]
             });

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DevExtreme DataGrid to PDF / jsPDF-AutoTable</title>
+
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/20.1.4/css/dx.common.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/20.1.4/css/dx.light.css" />
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.2/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn3.devexpress.com/jslib/20.1.4/js/dx.all.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.4.0/polyfill.min.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.6/jspdf.plugin.autotable.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvg/1.5/canvg.js"></script>
+
+    <script type="text/javascript" src="../../../data/employees.js"></script>
+    <script type="text/javascript" src="../../../js/exporter/exportDxDataGrid.js"></script>
+</head>
+<body>
+
+    <div class="dx-viewport demo-container">
+        <div id="DataGrid"></div>
+    </div>
+
+    <script>
+        $(function () {
+            function addSvgAsImage(doc, svg, x, y, w, h) {
+                var canvas = document.createElement('canvas');
+                canvas.height = 14;
+                canvas.width = 14;
+                var context = canvas.getContext('2d');
+                context.clearRect(0, 0, canvas.width, canvas.height);
+                canvg(canvas, svg);
+                var imgData = canvas.toDataURL('image/png');
+                doc.addImage(imgData, 'PNG', x, y, w, h);
+            }
+
+
+            $('#DataGrid').dxDataGrid({
+                dataSource: employees,
+                showBorders: true,
+                keyExpr: "ID",
+                selectedRowKeys: [3, 8, 5],
+                groupPanel: {
+                    visible: true
+                },
+                selection: {
+                    mode: 'multiple'
+                },
+                export: {
+                    enabled: true,
+                    allowExportSelectedData: true
+                },
+                onExporting: function (e) {
+                    var pdfDoc = new jsPDF('p', 'pt', 'a4');
+                    var pdfConfig = {
+                        //theme: 'grid'
+                    };
+                    exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
+                        // cusomize cell
+                        if (gridCell.column.dataField === 'Picture') {
+                            if (gridCell.rowType === 'data') {
+                                pdfCell.content = "";
+                                pdfCell.customDrawCell = function (data) {
+                                    var svg = '<svg height="14" width="14">\n' +
+                                            '  <circle cx="7" cy="7" r="4" stroke="blue" stroke-width="1" fill="red" />\n' +
+                                            '  Sorry, your browser does not support inline SVG.  \n' +
+                                            '</svg>';
+
+                                    var currentPos = data.cell.getTextPos();
+                                    addSvgAsImage(pdfDoc, svg, currentPos.x, currentPos.y, 14, 14);
+                                    pdfDoc.text("svg", currentPos.x + 14, currentPos.y, { baseline: 'top' });
+                                };
+                            }
+                        }
+
+                    }, pdfConfig).then(function () {
+                        // advanced pdfDoc customization
+                    }).then(function () {
+                        pdfDoc.save("filePDF.pdf");
+                    });
+
+                    e.cancel = true;
+                },
+                columns: [
+                    'FirstName',
+                    'LastName',
+                    'City',
+                    {
+                        dataField: 'State',
+                        groupIndex: 0
+                    }, {
+                        dataField: 'Position',
+                        width: 130
+                    }, {
+                        dataField: 'Picture',
+                        width: 120
+                    }
+                ]
+            });
+        });
+    </script>
+
+</body>
+</html>

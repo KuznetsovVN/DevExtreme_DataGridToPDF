@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DevExtreme DataGrid to PDF / jsPDF-AutoTable</title>
+
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/20.1.4/css/dx.common.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/20.1.4/css/dx.light.css" />
+
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.2/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn3.devexpress.com/jslib/20.1.4/js/dx.all.js"></script>
+
+</head>
+<body>
+
+    <div class="dx-viewport demo-container">
+        <table style="width: 100%">
+            <tr>
+                <td style="background: #eeeeee; width: 300px;" valign="top">
+                    <ul id="ul_list">
+                        <li><a href="#" data="dxDataGrid/jsPDF/simple.html">Simple</a></li>
+                        <li><a href="#" data="dxDataGrid/jsPDF/grouping.html">Grouping</a></li>
+                        <li><a href="#" data="dxDataGrid/jsPDF/bands.html">Bands</a></li>
+                        <li><a href="#" data="dxDataGrid/jsPDF/summary.html">Summary</a></li>
+                        <li><a href="#" data="dxDataGrid/jsPDF/custom_cell.html">Cell cusomization</a></li>
+                        <li><a href="#" data="dxDataGrid/jsPDF/custom_cell_template.html">Cell template cusomization</a></li>
+                        <li><a href="#" data="dxDataGrid/jsPDF/header_footer.html">Add Header and Footer</a></li>
+                        <li><a href="#" data="dxDataGrid/jsPDF/two_grids.html">Two grids on a page</a></li>
+                        <li><a href="#" data="dxDataGrid/jsPDF/two_grids_pages.html">Two grids on separated pages</a></li>
+                        <li><a href="#" data="dxDataGrid/jsPDF/with_content.html">Grids with custom content</a></li>
+
+                    </ul>
+                </td>
+                <td>
+                    <iframe id="iFrame1" src="dxDataGrid/jsPDF/simple.html" style="width:100%; height:700px;"></iframe>
+                </td>
+            </tr>
+        </table>
+        <div id="list"></div>
+    </div>
+
+    <script>
+        $(function () {
+            var items = $('#ul_list').find('a');
+            $.each(items, function (index, value) {
+                $(value).click(function (e) {
+                    document.getElementById('iFrame1').src = $(e.target).attr('data');
+                });
+            });
+        });
+    </script>
+
+</body>
+</html>

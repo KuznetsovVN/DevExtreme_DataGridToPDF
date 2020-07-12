@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>DevExtreme DataGrid to PDF / jsPDF-AutoTable</title>
+
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/20.1.4/css/dx.common.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn3.devexpress.com/jslib/20.1.4/css/dx.light.css" />
+    <link rel="stylesheet" type="text/css" href="styles.css" />
+
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.2/jszip.min.js"></script>
+    <script type="text/javascript" src="https://cdn3.devexpress.com/jslib/20.1.4/js/dx.all.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.4.0/polyfill.min.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.6/jspdf.plugin.autotable.js"></script>
+
+    <script type="text/javascript" src="../../../data/employees.js"></script>
+    <script type="text/javascript" src="../../../js/exporter/exportDxDataGrid.js"></script>
+
+</head>
+<body>
+
+    <div class="dx-viewport demo-container">
+        <div id="Btn_1"></div>
+        <table>
+            <tr>
+                <td>
+                    <div id="DataGrid_1"></div>
+                </td>
+                <td>
+                    <div id="DataGrid_2"></div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <script>
+        const custom_text = 'DevExtreme HTML5 JavaScript DataGrid is a client-side grid control available as a jQuery component. This control supports binding to data from local arrays, JSON files, Web API and OData services, as well as custom remote services. Check out other demos in this section to explore more DataGrid features, like data editing and validation, paging, scrolling, etc.';
+
+        $(function () {
+            $('#Btn_1').dxButton({
+                text: 'Export to PDF',
+                onClick: export_to_PDF
+            });
+
+            InitGrid('DataGrid_1');
+            InitGrid('DataGrid_2');
+        });
+
+        function export_to_PDF() {
+            var pdfDoc = new jsPDF('p', 'pt', 'a4');
+
+            var grid_1 = $('#DataGrid_1').dxDataGrid('instance');
+            var grid_2 = $('#DataGrid_2').dxDataGrid('instance');
+
+            AddGridToPDF(pdfDoc, grid_1, 10, 15, 280).then(function () {
+                AddGridToPDF(pdfDoc, grid_2, 300, 15, 280, function (pdfCell, gridCell) {
+                    pdfCell.styles.fillColor = 240;
+                })
+                .then(function () {
+                    var pageSize = pdfDoc.internal.pageSize;
+                    var pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth();
+
+                    pdfDoc.setFontSize(10);
+
+                    var splitText = pdfDoc.splitTextToSize(custom_text, pageWidth - 30);
+                    pdfDoc.text(splitText, 15, pdfDoc.lastAutoTable.finalY + 15, { baseline: 'top' });
+                }).then(function () {
+                    pdfDoc.save("filePDF.pdf");
+                });
+            });
+        }
+
+        function AddGridToPDF(doc, grid, x, y, tableWidth, customizeCell) {
+            return exportDataGrid(doc, grid, customizeCell, {
+                margin: {
+                    top: y || doc.lastAutoTable.finalY,
+                    left: x || 15
+                },
+                tableWidth: tableWidth || 280
+                
+            });
+        }
+
+        function InitGrid(id) {
+            $('#' + id).dxDataGrid({
+                dataSource: employees,
+                showBorders: true,
+                keyExpr: "ID",
+                selectedRowKeys: [3, 8, 5],
+                groupPanel: { visible: true },
+                selection: { mode: 'multiple' },
+                columns: [
+                    'FirstName',
+                    'LastName',
+                    'City',
+                    'State',
+                    {
+                        dataField: 'Position',
+                        width: 130
+                    }
+                ]
+            });
+        }
+    </script>
+
+</body>
+</html>

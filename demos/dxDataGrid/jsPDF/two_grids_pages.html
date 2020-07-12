@@ -16,50 +16,66 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.6/jspdf.plugin.autotable.js"></script>
 
-    <script type="text/javascript" src="../../data/employees.js"></script>
-    <script type="text/javascript" src="../../js/exporter/exportDxDataGrid.js"></script>
+    <script type="text/javascript" src="../../../data/employees.js"></script>
+    <script type="text/javascript" src="../../../js/exporter/exportDxDataGrid.js"></script>
 
 </head>
 <body>
 
     <div class="dx-viewport demo-container">
-        <div id="DataGrid"></div>
+        <div id="Btn_1"></div>
+        <table>
+            <tr>
+                <td>
+                    <div id="DataGrid_1"></div>
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 10px 0px;">
+                    <div style="border: solid 1px gray; background-color: #eeeeee;">break line</div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div id="DataGrid_2"></div>
+                </td>
+            </tr>
+        </table>
     </div>
 
     <script>
         $(function () {
-            $('#DataGrid').dxDataGrid({
+            $('#Btn_1').dxButton({
+                text: 'Export to PDF',
+                onClick: export_to_PDF
+            });
+
+            InitGrid('DataGrid_1');
+            InitGrid('DataGrid_2');
+        });
+
+        function export_to_PDF() {
+            var pdfDoc = new jsPDF('p', 'pt', 'a4');
+
+            var grid_1 = $('#DataGrid_1').dxDataGrid('instance');
+            var grid_2 = $('#DataGrid_2').dxDataGrid('instance');
+
+            exportDataGrid(pdfDoc, grid_1).then(function () {
+                pdfDoc.addPage();
+                exportDataGrid(pdfDoc, grid_2).then(function () {
+                    pdfDoc.save("filePDF.pdf");
+                });
+            });
+        }
+
+        function InitGrid(id) {
+            $('#' + id).dxDataGrid({
                 dataSource: employees,
                 showBorders: true,
                 keyExpr: "ID",
                 selectedRowKeys: [3, 8, 5],
-                groupPanel: {
-                    visible: true
-                },
-                selection: {
-                    mode: 'multiple'
-                },
-                export: {
-                    enabled: true,
-                    allowExportSelectedData: true
-                },
-                onExporting: function (e) {
-                    var pdfDoc = new jsPDF();
-                    exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
-                        // cusomize cell
-
-                        if (gridCell.rowType === 'data' && gridCell.data.ID === 3) {
-                            pdfCell.styles.fillColor = [ 128, 255, 128];
-                        }
-
-                    }).then(function () {
-                        // advanced pdfDoc customization
-                    }).then(function () {
-                        pdfDoc.save("filePDF.pdf");
-                    });
-
-                    e.cancel = true;
-                },
+                groupPanel: { visible: true },
+                selection: { mode: 'multiple' },
                 columns: [
                     'FirstName',
                     'LastName',
@@ -71,7 +87,7 @@
                     }
                 ]
             });
-        });
+        }
     </script>
 
 </body>
