@@ -26,7 +26,7 @@ var exportDataGrid = (function () {
         if (!autoTableOptions.theme) {
             autoTableOptions = $.extend({}, getDxThemeOptions(), autoTableOptions);
 
-            // BUG in an AutoTable
+            // BUG in the AutoTable
             autoTableOptions.startY = 14.2;
         }
 
@@ -435,13 +435,6 @@ var exportDataGrid = (function () {
                 return { rowSpan: cellMerge.rowspan, colSpan: cellMerge.colspan };
             }
         }
-    }
-
-    function tryGetPropNameFunc(stylesObj, propName, pdfCell, gridCell, rowIndex, cellIndex, rowLength) {
-        var funcName = 'get' + propName.charAt(0).toUpperCase() + propName.substring(1);
-        if (stylesObj[funcName] && typeof stylesObj[funcName] === 'function')
-            return stylesObj[funcName](pdfCell, gridCell, rowIndex, cellIndex, rowLength);
-        return undefined;
     }
 
     // Utility
