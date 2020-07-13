@@ -3,7 +3,7 @@ import $ from '../libs/jquery';
 import jsPDF from '../libs/jspdf.debug';
 import jsPDFAutotable from '../libs/jspdf.plugin.autotable';
 
-import exportPDF from '../js/Exporter/exportDxDataGrid';
+import exportPDF from '../js/Exporter/exportDataGrid';
 
 QUnit.testStart(() => {
     const markup = '<div id=\'dataGrid\'></div>';
