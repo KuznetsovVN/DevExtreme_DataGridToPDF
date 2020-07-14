@@ -19,6 +19,13 @@
 
     <script type="text/javascript" src="../../../data/employees.js"></script>
     <script type="text/javascript" src="../../../js/exporter/exportDataGrid.js"></script>
+
+    <style>
+        img {
+            height: 100px;
+            display: block;
+        }
+    </style>
 </head>
 <body>
 
@@ -28,6 +35,34 @@
 
     <script>
         $(function () {
+            const host = "https://js.devexpress.com/Demos/WidgetsGallery/JSDemos/";
+            var images = {};
+
+            for (var i = 1; i < 10; i++) {
+                var name = i.toString().padStart(2, "0") + ".png";
+                var key = "images/employees/" + name;
+                var path = host + key;
+                (function (key, path) {
+                    toDataURL(path, function (dataUrl) {
+                        images[key] = dataUrl;
+                    });
+                })(key, path);
+            }
+
+            function toDataURL(url, callback) {
+                var xhr = new XMLHttpRequest();
+                xhr.onload = function () {
+                    var reader = new FileReader();
+                    reader.onloadend = function () {
+                        callback(reader.result);
+                    }
+                    reader.readAsDataURL(xhr.response);
+                };
+                xhr.open('GET', url);
+                xhr.responseType = 'blob';
+                xhr.send();
+            }
+
             function addSvgAsImage(doc, svg, x, y, w, h) {
                 var canvas = document.createElement('canvas');
                 canvas.height = 14;
@@ -58,7 +93,14 @@
                 onExporting: function (e) {
                     var pdfDoc = new jsPDF('p', 'pt', 'a4');
                     var pdfConfig = {
-                        //theme: 'grid'
+                        //theme: 'grid',
+                        startY: 40,
+                        styles: {
+                            minCellHeight: 8
+                        },
+                        bodyStyles: {
+                            minCellHeight: 100 / 1.3
+                        }
                     };
                     exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
                         // cusomize cell
@@ -66,14 +108,7 @@
                             if (gridCell.rowType === 'data') {
                                 pdfCell.content = "";
                                 pdfCell.customDrawCell = function (data) {
-                                    var svg = '<svg height="14" width="14">\n' +
-                                            '  <circle cx="7" cy="7" r="4" stroke="blue" stroke-width="1" fill="red" />\n' +
-                                            '  Sorry, your browser does not support inline SVG.  \n' +
-                                            '</svg>';
-
-                                    var currentPos = data.cell.getTextPos();
-                                    addSvgAsImage(pdfDoc, svg, currentPos.x, currentPos.y, 14, 14);
-                                    pdfDoc.text("svg", currentPos.x + 14, currentPos.y, { baseline: 'top' });
+                                    pdfDoc.addImage(images[gridCell.value], "PNG", data.cell.x, data.cell.y, 78 / 1.3, 100 / 1.3);
                                 };
                             }
                         }
@@ -98,7 +133,12 @@
                         width: 130
                     }, {
                         dataField: 'Picture',
-                        width: 120
+                        width: 120,
+                        cellTemplate: function (container, options) {
+                            $("<div>")
+                                .append($("<img>", { "src": host + options.value }))
+                                .appendTo(container);
+                        }
                     }
                 ]
             });

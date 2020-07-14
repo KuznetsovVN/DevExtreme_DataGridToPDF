@@ -121,7 +121,7 @@ var employees = [{
   "LastName": "Riley",
   "Prefix": "Mr.",
   "Position": "Network Admin",
-  "Picture": "",
+  "Picture": "images/employees/01.png",
   "BirthDate": "1982/08/14",
   "HireDate": "2012/04/14",
   "Notes": "If you are like the rest of us at DevAV, then you've probably reached out for help from Taylor. He does a great job as a member of our IT department.",

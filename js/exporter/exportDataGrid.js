@@ -21,13 +21,10 @@ var exportDataGrid = (function () {
             startY: 15
         };
 
-        autoTableOptions = $.extend({}, defaultAutoTableOptions, autoTableOptions);
+        autoTableOptions = $.extend(true, {}, defaultAutoTableOptions, autoTableOptions);
 
         if (!autoTableOptions.theme) {
-            autoTableOptions = $.extend({}, getDxThemeOptions(), autoTableOptions);
-
-            // BUG in the AutoTable
-            autoTableOptions.startY = 14.2;
+            autoTableOptions = $.extend(true, {}, getDxThemeOptions(), autoTableOptions);
         }
 
         const dataProvider = component.getDataProvider(component.getController("export")._selectionOnly);
@@ -209,7 +206,7 @@ var exportDataGrid = (function () {
                 resolve();
             });
         }).then(function () {
-            var pdfDocOptions = $.extend({},
+            var pdfDocOptions = $.extend(true, {},
                 {
                     head: headerMatrix,
                     body: rowMatrix,
@@ -309,7 +306,7 @@ var exportDataGrid = (function () {
         if (rowType === 'footer')
             rowType = 'foot';
 
-        pdfCell.styles = $.extend({}, options.styles, options[rowType + 'Styles'], pdfCell.styles);
+        pdfCell.styles = $.extend(true, {}, options.styles, options[rowType + 'Styles'], pdfCell.styles);
 
         // try extend dynamic styles
 
