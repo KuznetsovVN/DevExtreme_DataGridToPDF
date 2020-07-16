@@ -209,27 +209,31 @@ var exportDataGrid = (function () {
                 {
                     head: headerMatrix,
                     body: rowMatrix,
-                    columnStyles: columnStyles,
-                    didDrawCell: function (data) {
-
-                        if (data.row.index === -1 || data.column.index === -1)
-                            return;
-
-                        // Internal draw cell
-                        var internalDrawSectionMatrix = internalDrawMatrix[data.row.section];
-                        var internalDrawCell = internalDrawSectionMatrix[data.row.index][data.column.index];
-                        if (internalDrawCell)
-                            internalDrawCell.func(data, internalDrawCell.opts);
-
-                        // Custom draw cell
-
-                        var customDrawSectionMatrix = customDrawMatrix[data.row.section];
-                        var customDrawCell = customDrawSectionMatrix[data.row.index][data.column.index];
-                        if (customDrawCell)
-                            customDrawCell.func(data, customDrawCell.opts);
-                    }
+                    columnStyles: columnStyles
                 },
                 autoTableOptions);
+
+            var _didDrawCell = pdfDocOptions.didDrawCell;
+            pdfDocOptions.didDrawCell = function (data) {
+                if (data.row.index === -1 || data.column.index === -1)
+                    return;
+
+                // Internal draw cell
+                var internalDrawSectionMatrix = internalDrawMatrix[data.row.section];
+                var internalDrawCell = internalDrawSectionMatrix[data.row.index][data.column.index];
+                if (internalDrawCell)
+                    internalDrawCell.func(data, internalDrawCell.opts);
+
+                // Custom draw cell
+
+                var customDrawSectionMatrix = customDrawMatrix[data.row.section];
+                var customDrawCell = customDrawSectionMatrix[data.row.index][data.column.index];
+                if (customDrawCell)
+                    customDrawCell.func(data, customDrawCell.opts);
+
+                if (_didDrawCell)
+                    _didDrawCell(data);
+            };
 
             pdfDoc.autoTable(pdfDocOptions);
         });
