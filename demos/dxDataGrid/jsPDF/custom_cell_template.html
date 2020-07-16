@@ -63,17 +63,6 @@
                 xhr.send();
             }
 
-            function addSvgAsImage(doc, svg, x, y, w, h) {
-                var canvas = document.createElement('canvas');
-                canvas.height = 14;
-                canvas.width = 14;
-                var context = canvas.getContext('2d');
-                context.clearRect(0, 0, canvas.width, canvas.height);
-                canvg(canvas, svg);
-                var imgData = canvas.toDataURL('image/png');
-                doc.addImage(imgData, 'PNG', x, y, w, h);
-            }
-
 
             $('#DataGrid').dxDataGrid({
                 dataSource: employees,
@@ -94,7 +83,6 @@
                     var pdfDoc = new jsPDF('p', 'pt', 'a4');
                     var pdfConfig = {
                         //theme: 'grid',
-                        startY: 40,
                         styles: {
                             minCellHeight: 8
                         },

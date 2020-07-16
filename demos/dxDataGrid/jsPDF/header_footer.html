@@ -58,7 +58,7 @@
                         if (gridCell.rowType === 'data' && gridCell.column.dataField === 'OrderDate') {
                             pdfCell.content = Globalize.formatDate(gridCell.value, { date: "short" })
                         }
-                    }, { startY: 14.2 }).then(function () {
+                    }).then(function () {
                         // advanced pdfDoc customization
 
                         pdfDoc.setFontSize(12);

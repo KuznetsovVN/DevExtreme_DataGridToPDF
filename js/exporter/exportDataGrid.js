@@ -18,7 +18,6 @@ var exportDataGrid = (function () {
 
     function exportToPDF(pdfDoc, component, customizeCell, autoTableOptions) {
         const defaultAutoTableOptions = {
-            startY: 15
         };
 
         autoTableOptions = $.extend(true, {}, defaultAutoTableOptions, autoTableOptions);

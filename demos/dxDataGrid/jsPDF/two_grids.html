@@ -56,9 +56,7 @@
             var grid_2 = $('#DataGrid_2').dxDataGrid('instance');
 
             AddGridToPDF(pdfDoc, grid_1, 10, 15, 280).then(function () {
-                AddGridToPDF(pdfDoc, grid_2, 300, 15, 280, function (pdfCell, gridCell) {
-                    pdfCell.styles.fillColor = 240;
-                })
+                AddGridToPDF(pdfDoc, grid_2, 300, 15, 280)
                 .then(function () {
                     var pageSize = pdfDoc.internal.pageSize;
                     var pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth();
@@ -76,9 +74,9 @@
         function AddGridToPDF(doc, grid, x, y, tableWidth, customizeCell) {
             return exportDataGrid(doc, grid, customizeCell, {
                 margin: {
-                    top: y || doc.lastAutoTable.finalY,
                     left: x || 15
                 },
+                startY: y || doc.lastAutoTable.finalY,
                 tableWidth: tableWidth || 280
                 
             });
