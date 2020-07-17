@@ -44,6 +44,7 @@ var exportDataGrid = (function () {
         };
 
         var columnStyles = [];
+        var lastDrawedBodyRowIndex = -1;
 
         return new Promise((resolve) => {
             dataProvider.ready().done(() => {
@@ -215,24 +216,38 @@ var exportDataGrid = (function () {
 
             var _didDrawCell = pdfDocOptions.didDrawCell;
             pdfDocOptions.didDrawCell = function (data) {
-                if (data.row.index === -1 || data.column.index === -1)
-                    return;
+                var rowIndex = data.row.index;
+                var columnIndex = data.column.index;
+                var isBreakedRow = false;
+
+                if (rowIndex === -1 && columnIndex !== -1) {
+                    if (lastDrawedBodyRowIndex > -1) {
+                        isBreakedRow = true;
+                        rowIndex = lastDrawedBodyRowIndex;
+                    }
+                }
 
                 // Internal draw cell
                 var internalDrawSectionMatrix = internalDrawMatrix[data.row.section];
-                var internalDrawCell = internalDrawSectionMatrix[data.row.index][data.column.index];
+                var internalDrawCell = internalDrawSectionMatrix[rowIndex][columnIndex];
                 if (internalDrawCell)
                     internalDrawCell.func(data, internalDrawCell.opts);
+
+                if (isBreakedRow)
+                    return;
 
                 // Custom draw cell
 
                 var customDrawSectionMatrix = customDrawMatrix[data.row.section];
-                var customDrawCell = customDrawSectionMatrix[data.row.index][data.column.index];
+                var customDrawCell = customDrawSectionMatrix[rowIndex][columnIndex];
                 if (customDrawCell)
                     customDrawCell.func(data, customDrawCell.opts);
 
                 if (_didDrawCell)
                     _didDrawCell(data);
+
+                if(data.row.section === 'body')
+                    lastDrawedBodyRowIndex = data.row.index;
             };
 
             pdfDoc.autoTable(pdfDocOptions);
