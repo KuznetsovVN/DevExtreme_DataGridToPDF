@@ -57,7 +57,10 @@ var exportDataGrid = (function () {
 
                 for (let i = 0; i < columns.length; i++) {
                     columnStyles[i] = columnStyles[i] || {};
-                    columnStyles[i].cellWidth = 'auto';
+                    if (columns[i].gridColumn.width)
+                        columnStyles[i].cellWidth = ptFromPx(columns[i].gridColumn.width);
+                    else
+                        columnStyles[i].cellWidth = 'auto';
                 }
 
                 const styles = dataProvider.getStyles();
@@ -494,6 +497,10 @@ var exportDataGrid = (function () {
             doc.setTextColor(color[0], color[1], color[2]);
         else
             doc.setTextColor(color);
+    }
+
+    function ptFromPx(px) {
+        return px / 1.3;
     }
 
     return exportToPDF;
