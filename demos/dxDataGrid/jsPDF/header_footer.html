@@ -75,13 +75,13 @@
                             var footer = 'Page ' + String(i) + ' of ' + String(pageCount);
 
                             // Header
-                            pdfDoc.text(header, 15, 5, { baseline: 'top' });
+                            pdfDoc.text(header, 40, 15, { baseline: 'top' });
 
                             // Footer
                             if (odd)
-                                pdfDoc.text(footer, pageWidth - (pdfDoc.getTextWidth(footer) + 15), pageHeight - 12, { baseline: 'top' });
+                                pdfDoc.text(footer, pageWidth - (pdfDoc.getTextWidth(footer) + 40), pageHeight - 15, { baseline: 'bottom' });
                             else
-                                pdfDoc.text(footer, 15, pageHeight - 12, { baseline: 'top' });
+                                pdfDoc.text(footer, 40, pageHeight - 15, { baseline: 'bottom' });
                         }
                     }).then(function () {
                         pdfDoc.save("filePDF.pdf");
