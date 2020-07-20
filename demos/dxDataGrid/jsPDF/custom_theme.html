@@ -52,7 +52,7 @@
                     allowExportSelectedData: true
                 },
                 onExporting: function (e) {
-                    var pdfDoc = new jsPDF();
+                    var pdfDoc = new jsPDF('p', 'pt', 'a4');
 
                     var groupCellTextColorFunc = function (pdfCell, gridCell, rowIndex, cellIndex, rowLength) {
                         if (cellIndex === 0)
