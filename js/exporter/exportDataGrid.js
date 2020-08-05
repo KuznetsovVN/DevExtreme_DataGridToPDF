@@ -153,8 +153,13 @@ var exportDataGrid = (function () {
                        // Assing style from dxDataGrid
 
                         if (rowType === 'header') {
-                            if (columns[cellIndex].alignment)
-                                pdfCell.styles.halign = columns[cellIndex].alignment;
+                            var headerId = cell.column.headerId;
+                            var column = $.grep(columns, function(item) {
+                              return item.headerId === headerId;
+                            })[0];
+
+                            if (column && column.alignment)
+                                pdfCell.styles.halign = column.alignment;
                         }
                         else {
                             var style = styles[dataProvider.getStyleId(rowIndex, cellIndex)];
