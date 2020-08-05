@@ -280,6 +280,7 @@ var exportDataGrid = (function () {
         return {
             theme: 'plain',
             useDxTheme: true,
+            tableLineColor: 149,
             tableLineWidth: 0.1,
             styles: {
                 textColor: 51,
