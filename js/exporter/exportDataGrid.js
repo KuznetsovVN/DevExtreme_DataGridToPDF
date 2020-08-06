@@ -189,7 +189,8 @@ var exportDataGrid = (function () {
                         // Add cell to row
 
                         if(rowType === 'header') {
-                            if(!mergedCells[rowIndex][cellIndex] || pdfCell.rowSpan > 1 || pdfCell.colSpan > 1) {
+                            var isMergedCell = mergedCells[rowIndex] && mergedCells[rowIndex][cellIndex];
+                            if(!isMergedCell || pdfCell.rowSpan > 1 || pdfCell.colSpan > 1) {
                                 headerRow.push(pdfCell);
                             }   
                         }
