@@ -176,9 +176,11 @@ var exportDataGrid = (function () {
                                 if(style.dataType === 'date') {
                                     pdfCell.content = DevExpress.localization.formatDate(new Date(pdfCell.content), style.format);
                                 }
-                                if(style.format) {
+                                if(style.dataType === 'number') {
                                     if(style.format === 'fixedPoint')
                                         pdfCell.content = DevExpress.localization.formatNumber(pdfCell.content);
+                                    if(style.format === 'percent')
+                                        pdfCell.content += "%";
                                 }
                             }
                         }
