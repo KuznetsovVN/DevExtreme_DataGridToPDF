@@ -164,15 +164,21 @@ var exportDataGrid = (function () {
                         else {
                             var style = styles[dataProvider.getStyleId(rowIndex, cellIndex)];
                             if (style) {
-                                if (style.alignment)
+                                if(style.alignment) {
                                     pdfCell.styles.halign = style.alignment;
-                                if (style.bold)
+                                }
+                                if(style.bold) {
                                     pdfCell.styles.fontStyle = 'bold';
-                                if (style.wrapText) {
+                                }
+                                if(style.wrapText) {
                                     pdfCell.styles.cellWidth = 'wrap';
                                 }
-                                if (style.dataType === 'date') {
+                                if(style.dataType === 'date') {
                                     pdfCell.content = DevExpress.localization.formatDate(new Date(pdfCell.content), style.format);
+                                }
+                                if(style.format) {
+                                    if(style.format === 'fixedPoint')
+                                        pdfCell.content = DevExpress.localization.formatNumber(pdfCell.content);
                                 }
                             }
                         }
