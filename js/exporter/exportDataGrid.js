@@ -179,9 +179,10 @@ var exportDataGrid = (function () {
 
                         // Add cell to row
 
-                        if (rowType === 'header') {
-                            if (pdfCell.content !== "")
+                        if(rowType === 'header') {
+                            if(!mergedCells[rowIndex][cellIndex] || pdfCell.rowSpan > 1 || pdfCell.colSpan > 1) {
                                 headerRow.push(pdfCell);
+                            }   
                         }
                         else {
                             if (rowType === 'group') {
