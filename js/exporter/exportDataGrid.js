@@ -302,13 +302,13 @@ var exportDataGrid = (function () {
             headStyles: {
                 fontStyle: 'normal',
                 textColor: 149,
-                lineWidth: 0.1
+                lineWidths: [0.1]
             },
             bodyStyles: {
                 lineWidths: [0.1, 0]
             },
             footStyles: {
-                lineWidth: 0.1
+                lineWidths: [0.1]
             },
             groupStyles: {
                 fillColor: 247,
