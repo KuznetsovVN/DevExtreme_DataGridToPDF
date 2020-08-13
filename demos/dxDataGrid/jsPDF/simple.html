@@ -11,10 +11,13 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.2/jszip.min.js"></script>
     <script type="text/javascript" src="https://cdn3.devexpress.com/jslib/20.1.4/js/dx.all.js"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.4.0/polyfill.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js"></script>
 
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.6/jspdf.plugin.autotable.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.0.0/jspdf.umd.min.js"></script>
+    <script>
+        window.jsPDF = window.jspdf.jsPDF
+    </script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.9/jspdf.plugin.autotable.min.js"></script>
 
     <script type="text/javascript" src="../../../data/employees.js"></script>
     <script type="text/javascript" src="../../../js/exporter/exportDataGrid.js"></script>
@@ -27,7 +30,7 @@
     </div>
 
     <script>
-        $(function () {
+        $(function() {
             $('#DataGrid').dxDataGrid({
                 dataSource: employees,
                 showBorders: true,
@@ -43,13 +46,13 @@
                     enabled: true,
                     allowExportSelectedData: true
                 },
-                onExporting: function (e) {
+                onExporting: function(e) {
                     var pdfDoc = new jsPDF('p', 'pt', 'a4');
-                    exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
+                    exportDataGrid(pdfDoc, e.component, function(pdfCell, gridCell) {
                         // cusomize cell
-                    }).then(function () {
+                    }).then(function() {
                         // advanced pdfDoc customization
-                    }).then(function () {
+                    }).then(function() {
                         pdfDoc.save("filePDF.pdf");
                     });
 

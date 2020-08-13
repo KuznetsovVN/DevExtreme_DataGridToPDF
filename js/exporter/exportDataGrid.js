@@ -350,7 +350,7 @@ var exportDataGrid = (function() {
 
         for(var i = 0; i < funcs.length; i++) {
             var funcName = funcs[i];
-            if(funcName.startsWith("get")) {
+            if(funcName.indexOf("get") === 0) {
                 var propName = funcName.substring(3);
                 propName = propName.charAt(0).toLowerCase() + propName.slice(1);
                 pdfCell.styles[propName] = pdfCell.styles[funcName](pdfCell, gridCell, rowIndex, cellIndex, rowLength);

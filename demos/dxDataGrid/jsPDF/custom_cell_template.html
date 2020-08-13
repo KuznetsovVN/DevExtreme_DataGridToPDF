@@ -11,10 +11,13 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.2/jszip.min.js"></script>
     <script type="text/javascript" src="https://cdn3.devexpress.com/jslib/20.1.4/js/dx.all.js"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.4.0/polyfill.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js"></script>
 
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.6/jspdf.plugin.autotable.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.0.0/jspdf.umd.min.js"></script>
+    <script>
+        window.jsPDF = window.jspdf.jsPDF
+    </script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.9/jspdf.plugin.autotable.min.js"></script>
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvg/1.5/canvg.js"></script>
 
     <script type="text/javascript" src="../../../data/employees.js"></script>
@@ -34,16 +37,16 @@
     </div>
 
     <script>
-        $(function () {
+        $(function() {
             const host = "https://js.devexpress.com/Demos/WidgetsGallery/JSDemos/";
             var images = {};
 
-            for (var i = 1; i < 10; i++) {
+            for(var i = 1; i < 10; i++) {
                 var name = i.toString().padStart(2, "0") + ".png";
                 var key = "images/employees/" + name;
                 var path = host + key;
-                (function (key, path) {
-                    toDataURL(path, function (dataUrl) {
+                (function(key, path) {
+                    toDataURL(path, function(dataUrl) {
                         images[key] = dataUrl;
                     });
                 })(key, path);
@@ -51,9 +54,9 @@
 
             function toDataURL(url, callback) {
                 var xhr = new XMLHttpRequest();
-                xhr.onload = function () {
+                xhr.onload = function() {
                     var reader = new FileReader();
-                    reader.onloadend = function () {
+                    reader.onloadend = function() {
                         callback(reader.result);
                     }
                     reader.readAsDataURL(xhr.response);
@@ -79,7 +82,7 @@
                     enabled: true,
                     allowExportSelectedData: true
                 },
-                onExporting: function (e) {
+                onExporting: function(e) {
                     var pdfDoc = new jsPDF('p', 'pt', 'a4');
                     var pdfConfig = {
                         //theme: 'grid',
@@ -99,19 +102,19 @@
                             minCellHeight: 100
                         }
                     };
-                    exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
+                    exportDataGrid(pdfDoc, e.component, function(pdfCell, gridCell) {
                         // cusomize cell
-                        if (gridCell.column.dataField === 'Picture') {
-                            if (gridCell.rowType === 'data') {
+                        if(gridCell.column.dataField === 'Picture') {
+                            if(gridCell.rowType === 'data') {
                                 pdfCell.content = "";
-                                pdfCell.customDrawCell = function (data) {
+                                pdfCell.customDrawCell = function(data) {
                                     pdfDoc.addImage(images[gridCell.value], "PNG", data.cell.x, data.cell.y, 78, 100);
                                 };
                             }
                         }
-                    }, pdfConfig).then(function () {
+                    }, pdfConfig).then(function() {
                         // advanced pdfDoc customization
-                    }).then(function () {
+                    }).then(function() {
                         pdfDoc.save("filePDF.pdf");
                     });
 
@@ -130,7 +133,7 @@
                     }, {
                         dataField: 'Picture',
                         width: 120,
-                        cellTemplate: function (container, options) {
+                        cellTemplate: function(container, options) {
                             $("<div>")
                                 .append($("<img>", { "src": host + options.value }))
                                 .appendTo(container);
@@ -139,6 +142,23 @@
                 ]
             });
         });
+
+        if(!String.prototype.padStart) {
+            String.prototype.padStart = function padStart(targetLength, padString) {
+                targetLength = targetLength >> 0; //truncate if number or convert non-number to 0;
+                padString = String((typeof padString !== 'undefined' ? padString : ' '));
+                if(this.length > targetLength) {
+                    return String(this);
+                }
+                else {
+                    targetLength = targetLength - this.length;
+                    if(targetLength > padString.length) {
+                        padString += padString.repeat(targetLength / padString.length); //append to original to ensure we are longer than needed
+                    }
+                    return padString.slice(0, targetLength) + String(this);
+                }
+            };
+        }
     </script>
 
 </body>

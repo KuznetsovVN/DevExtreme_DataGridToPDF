@@ -11,14 +11,17 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.1.2/jszip.min.js"></script>
     <script type="text/javascript" src="https://cdn3.devexpress.com/jslib/20.1.4/js/dx.all.js"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-polyfill/7.4.0/polyfill.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js"></script>
 
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.debug.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.6/jspdf.plugin.autotable.js"></script>
-    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/canvg/1.5/canvg.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.0.0/jspdf.umd.min.js"></script>
+    <script>
+        window.jsPDF = window.jspdf.jsPDF
+    </script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.9/jspdf.plugin.autotable.min.js"></script>
 
     <script type="text/javascript" src="../../../data/countries.js"></script>
     <script type="text/javascript" src="../../../js/exporter/exportDataGrid.js"></script>
+
 </head>
 <body>
 
@@ -27,7 +30,7 @@
     </div>
 
     <script>
-        $(function () {
+        $(function() {
             $('#DataGrid').dxDataGrid({
                 dataSource: countries,
                 showBorders: true,
@@ -43,9 +46,9 @@
                     enabled: true,
                     allowExportSelectedData: true
                 },
-                onExporting: function (e) {
+                onExporting: function(e) {
                     var pdfDoc = new jsPDF('p', 'pt', 'a4');
-                    exportDataGrid(pdfDoc, e.component, function (pdfCell, gridCell) {
+                    exportDataGrid(pdfDoc, e.component, function(pdfCell, gridCell) {
                         // cusomize cell
                         //pdfCell.styles.lineWidth = 0.3;
                         //if (gridCell.rowType === 'header') {
@@ -56,66 +59,66 @@
                         //    pdfCell.styles.lineColor = [0, 0, 255];
                         //    pdfCell.styles.textColor = [0, 0, 255];
                         //}
-                    }).then(function () {
+                    }).then(function() {
                         // advanced pdfDoc customization
-                    }).then(function () {
+                    }).then(function() {
                         pdfDoc.save("filePDF.pdf");
                     });
 
                     e.cancel = true;
                 },
                 columns: ["Country", {
-                    headerCellTemplate: function (container) {
+                    headerCellTemplate: function(container) {
                         container.append($("<div>Area, km<sup>2</sup></div>"));
                     },
                     dataField: "Area"
                 }, {
-                    caption: "Population",
-                    columns: [{
-                        caption: "Total",
-                        dataField: "Population_Total",
-                        format: "fixedPoint"
-                    }, {
-                        caption: "Urban",
-                        dataField: "Population_Urban",
-                        format: "percent"
-                    }]
-                }, {
-                    caption: "Nominal GDP",
-                    columns: [{
-                        caption: "Total, mln $",
-                        dataField: "GDP_Total",
-                        format: "fixedPoint",
-                        sortOrder: "desc"
-                    }, {
-                        caption: "By Sector",
+                        caption: "Population",
                         columns: [{
-                            caption: "Agriculture",
-                            dataField: "GDP_Agriculture",
-                            width: 95,
-                            format: {
-                                type: "percent",
-                                precision: 1
-                            }
+                            caption: "Total",
+                            dataField: "Population_Total",
+                            format: "fixedPoint"
                         }, {
-                            caption: "Industry",
-                            dataField: "GDP_Industry",
-                            width: 80,
-                            format: {
-                                type: "percent",
-                                precision: 1
-                            }
+                            caption: "Urban",
+                            dataField: "Population_Urban",
+                            format: "percent"
+                        }]
+                    }, {
+                        caption: "Nominal GDP",
+                        columns: [{
+                            caption: "Total, mln $",
+                            dataField: "GDP_Total",
+                            format: "fixedPoint",
+                            sortOrder: "desc"
                         }, {
-                            caption: "Services",
-                            dataField: "GDP_Services",
-                            width: 85,
-                            format: {
-                                type: "percent",
-                                precision: 1
-                            }
+                            caption: "By Sector",
+                            columns: [{
+                                caption: "Agriculture",
+                                dataField: "GDP_Agriculture",
+                                width: 95,
+                                format: {
+                                    type: "percent",
+                                    precision: 1
+                                }
+                            }, {
+                                caption: "Industry",
+                                dataField: "GDP_Industry",
+                                width: 80,
+                                format: {
+                                    type: "percent",
+                                    precision: 1
+                                }
+                            }, {
+                                caption: "Services",
+                                dataField: "GDP_Services",
+                                width: 85,
+                                format: {
+                                    type: "percent",
+                                    precision: 1
+                                }
+                            }]
                         }]
                     }]
-                }]
             });
         });
     </script>
