@@ -74,15 +74,20 @@
             });
         }
 
-        function AddGridToPDF(doc, grid, x, y, tableWidth, customizeCell) {
-            return exportDataGrid(doc, grid, customizeCell, {
-                margin: {
-                    left: x || 15
-                },
-                startY: y || doc.lastAutoTable.finalY,
-                tableWidth: tableWidth || 280
-
-            });
+        function AddGridToPDF(pdfDoc, grid, x, y, tableWidth, customizeCell) {
+            var options = {
+                pdfDoc: pdfDoc,
+                component: grid,
+                customizeCell: customizeCell,
+                autoTableOptions: {
+                    margin: {
+                        left: x || 15
+                    },
+                    startY: y || doc.lastAutoTable.finalY,
+                    tableWidth: tableWidth || 280
+                }
+            };
+            return exportDataGrid(options);
         }
 
         function InitGrid(id) {

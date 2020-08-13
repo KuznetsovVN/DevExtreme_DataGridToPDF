@@ -55,14 +55,16 @@
                 },
                 onExporting: function(e) {
                     var pdfDoc = new jsPDF('p', 'pt', 'a4');
-                    exportDataGrid(pdfDoc, e.component, function(pdfCell, gridCell) {
-                        // cusomize cell
-                        if(gridCell.rowType === 'data' && gridCell.column.dataField === 'OrderDate') {
-                            pdfCell.content = Globalize.formatDate(gridCell.value, { date: "short" })
+                    var options = {
+                        pdfDoc: pdfDoc,
+                        component: e.component,
+                        customizeCell: function(pdfCell, gridCell) {
+                            if(gridCell.rowType === 'data' && gridCell.column.dataField === 'OrderDate') {
+                                pdfCell.content = Globalize.formatDate(gridCell.value, { date: "short" })
+                            }
                         }
-                    }).then(function() {
-                        // advanced pdfDoc customization
-
+                    };
+                    exportDataGrid(options).then(function() {
                         pdfDoc.setFontSize(12);
                         const pageCount = pdfDoc.internal.getNumberOfPages();
                         for(var i = 1; i <= pageCount; i++) {

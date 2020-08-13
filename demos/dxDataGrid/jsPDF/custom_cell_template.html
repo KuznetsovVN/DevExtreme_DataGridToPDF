@@ -84,37 +84,37 @@
                 },
                 onExporting: function(e) {
                     var pdfDoc = new jsPDF('p', 'pt', 'a4');
-                    var pdfConfig = {
-                        //theme: 'grid',
-                        //startY: 500,
-                        margin: { top: 20, bottom: 20 },
-                        columnStyles: [
-                            { cellWidth: 'auto' },
-                            { cellWidth: 'auto' },
-                            { cellWidth: 'auto' },
-                            { cellWidth: 'auto' },
-                            { cellWidth: 78 }
-                        ],
-                        styles: {
-                            minCellHeight: 8
+                    var options = {
+                        pdfDoc: pdfDoc,
+                        component: e.component,
+                        customizeCell: function(pdfCell, gridCell) {
+                            if(gridCell.column.dataField === 'Picture') {
+                                if(gridCell.rowType === 'data') {
+                                    pdfCell.content = "";
+                                    pdfCell.customDrawCell = function(data) {
+                                        pdfDoc.addImage(images[gridCell.value], "PNG", data.cell.x, data.cell.y, 78, 100);
+                                    };
+                                }
+                            }
                         },
-                        bodyStyles: {
-                            minCellHeight: 100
-                        }
-                    };
-                    exportDataGrid(pdfDoc, e.component, function(pdfCell, gridCell) {
-                        // cusomize cell
-                        if(gridCell.column.dataField === 'Picture') {
-                            if(gridCell.rowType === 'data') {
-                                pdfCell.content = "";
-                                pdfCell.customDrawCell = function(data) {
-                                    pdfDoc.addImage(images[gridCell.value], "PNG", data.cell.x, data.cell.y, 78, 100);
-                                };
+                        autoTableOptions: {
+                            margin: { top: 20, bottom: 20 },
+                            columnStyles: [
+                                { cellWidth: 'auto' },
+                                { cellWidth: 'auto' },
+                                { cellWidth: 'auto' },
+                                { cellWidth: 'auto' },
+                                { cellWidth: 78 }
+                            ],
+                            styles: {
+                                minCellHeight: 8
+                            },
+                            bodyStyles: {
+                                minCellHeight: 100
                             }
                         }
-                    }, pdfConfig).then(function() {
-                        // advanced pdfDoc customization
-                    }).then(function() {
+                    };
+                    exportDataGrid(options).then(function() {
                         pdfDoc.save("filePDF.pdf");
                     });
 

@@ -48,11 +48,11 @@
                 },
                 onExporting: function(e) {
                     var pdfDoc = new jsPDF('p', 'pt', 'a4');
-                    exportDataGrid(pdfDoc, e.component, function(pdfCell, gridCell) {
-                        // cusomize cell
-                    }).then(function() {
-                        // advanced pdfDoc customization
-                    }).then(function() {
+                    var options = {
+                        pdfDoc: pdfDoc,
+                        component: e.component
+                    };
+                    exportDataGrid(options).then(function() {
                         pdfDoc.save("filePDF.pdf");
                     });
 

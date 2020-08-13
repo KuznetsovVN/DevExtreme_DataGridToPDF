@@ -48,16 +48,16 @@
                 },
                 onExporting: function(e) {
                     var pdfDoc = new jsPDF('p', 'pt', 'a4');
-                    exportDataGrid(pdfDoc, e.component, function(pdfCell, gridCell) {
-                        // cusomize cell
-
-                        if(gridCell.rowType === 'data' && gridCell.data.ID === 3) {
-                            pdfCell.styles.fillColor = [128, 255, 128];
+                    var options = {
+                        pdfDoc: pdfDoc,
+                        component: e.component,
+                        customizeCell: function(pdfCell, gridCell) {
+                            if(gridCell.rowType === 'data' && gridCell.data.ID === 3) {
+                                pdfCell.styles.fillColor = [128, 255, 128];
+                            }
                         }
-
-                    }).then(function() {
-                        // advanced pdfDoc customization
-                    }).then(function() {
+                    };
+                    exportDataGrid(options).then(function() {
                         pdfDoc.save("filePDF.pdf");
                     });
 

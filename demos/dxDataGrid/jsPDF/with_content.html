@@ -66,30 +66,31 @@
         function export_to_PDF() {
             var pdfDoc = new jsPDF('p', 'pt', 'a4');
 
-            var grid_1 = $('#DataGrid_1').dxDataGrid('instance');
-
-            var autoTableOptions = {
-                margin: {
-                    top: 15,
-                    left: 15
-                },
-                tableWidth: 300
+            var options = {
+                pdfDoc: pdfDoc,
+                component: $('#DataGrid_1').dxDataGrid('instance'),
+                autoTableOptions: {
+                    margin: {
+                        top: 15,
+                        left: 15
+                    },
+                    tableWidth: 300
+                }
             };
-            exportDataGrid(pdfDoc, grid_1, null, autoTableOptions)
-                .then(function() {
 
-                    pdfDoc.addImage(imageBase64, 320, 15, 180, 180);
+            exportDataGrid(options).then(function() {
+                pdfDoc.addImage(imageBase64, 320, 15, 180, 180);
 
-                    var pageSize = pdfDoc.internal.pageSize;
-                    var pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth();
+                var pageSize = pdfDoc.internal.pageSize;
+                var pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth();
 
-                    pdfDoc.setFontSize(10);
+                pdfDoc.setFontSize(10);
 
-                    var splitText = pdfDoc.splitTextToSize(custom_text, pageWidth - 330);
-                    pdfDoc.text(splitText, 320, 210, { baseline: 'top' });
-                }).then(function() {
-                    pdfDoc.save("filePDF.pdf");
-                });
+                var splitText = pdfDoc.splitTextToSize(custom_text, pageWidth - 330);
+                pdfDoc.text(splitText, 320, 210, { baseline: 'top' });
+            }).then(function() {
+                pdfDoc.save("filePDF.pdf");
+            });
         }
 
         function AddGridToPDF(doc, grid, x, y, tableWidth, customizeCell) {

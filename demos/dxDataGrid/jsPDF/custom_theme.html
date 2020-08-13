@@ -55,7 +55,6 @@
                     allowExportSelectedData: true
                 },
                 onExporting: function(e) {
-                    var pdfDoc = new jsPDF('p', 'pt', 'a4');
 
                     var groupCellTextColorFunc = function(pdfCell, gridCell, rowIndex, cellIndex, rowLength) {
                         if(cellIndex === 0)
@@ -75,46 +74,46 @@
                         return [leftLineWidth, topLineWidth, rightLineWidth, bottomLineWidth];
                     };
 
-                    var pdfAutoTableConfig = {
-                        tableLineColor: [0, 160, 0],
-                        styles: {
-                            textColor: [0, 160, 0],
-                            lineColor: [0, 160, 0],
-                            lineWidth: 0
-                        },
-                        headStyles: {
-                            fontStyle: 'normal',
-                            textColor: [0, 160, 0],
-                            lineWidth: 0.1
-                        },
-                        bodyStyles: {
-                            lineWidths: [0.1, 0]
-                        },
-                        footStyles: {
-                            lineWidth: 0.1
-                        },
-                        groupStyles: {
-                            fillColor: [128, 255, 128],
-                            getTextColor: groupCellTextColorFunc,
-                            getLineWidths: groupCellLineWidthsFunc
-                        },
-                        groupFooterStyles: {
-                            textColor: [0, 120, 0],
-                            getLineWidths: groupCellLineWidthsFunc
-                        },
-                        totalFooterStyles: {
-                            textColor: [0, 120, 0],
-                            minCellHeight: 11,
-                            valign: 'middle',
-                            getLineWidths: groupCellLineWidthsFunc
+                    var pdfDoc = new jsPDF('p', 'pt', 'a4');
+                    var options = {
+                        pdfDoc: pdfDoc,
+                        component: e.component,
+                        autoTableOptions: {
+                            tableLineColor: [0, 160, 0],
+                            styles: {
+                                textColor: [0, 160, 0],
+                                lineColor: [0, 160, 0],
+                                lineWidth: 0
+                            },
+                            headStyles: {
+                                fontStyle: 'normal',
+                                textColor: [0, 160, 0],
+                                lineWidth: 0.1
+                            },
+                            bodyStyles: {
+                                lineWidths: [0.1, 0]
+                            },
+                            footStyles: {
+                                lineWidth: 0.1
+                            },
+                            groupStyles: {
+                                fillColor: [128, 255, 128],
+                                getTextColor: groupCellTextColorFunc,
+                                getLineWidths: groupCellLineWidthsFunc
+                            },
+                            groupFooterStyles: {
+                                textColor: [0, 120, 0],
+                                getLineWidths: groupCellLineWidthsFunc
+                            },
+                            totalFooterStyles: {
+                                textColor: [0, 120, 0],
+                                minCellHeight: 11,
+                                valign: 'middle',
+                                getLineWidths: groupCellLineWidthsFunc
+                            }
                         }
                     };
-
-                    exportDataGrid(pdfDoc, e.component, function(pdfCell, gridCell) {
-                        // cusomize cell
-                    }, pdfAutoTableConfig).then(function() {
-                        // advanced pdfDoc customization
-                    }).then(function() {
+                    exportDataGrid(options).then(function() {
                         pdfDoc.save("filePDF.pdf");
                     });
 

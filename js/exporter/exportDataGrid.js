@@ -1,6 +1,7 @@
 var exportDataGrid = (function() {
 
     /*
+        pdfDoc                          - instance of jsPDF type
         customizeCell                   - Type callback   |   function(pdfCell, gridCell)
         autoTableOptions: {
             theme                       - Type: String
@@ -16,11 +17,11 @@ var exportDataGrid = (function() {
         }
      */
 
-    function exportToPDF(pdfDoc, component, customizeCell, autoTableOptions) {
-        const defaultAutoTableOptions = {
-        };
-
-        autoTableOptions = $.extend(true, {}, defaultAutoTableOptions, autoTableOptions);
+    function exportToPDF(options) {
+        var pdfDoc = options.pdfDoc;
+        var component = options.component;
+        var customizeCell = options.customizeCell;
+        var autoTableOptions = options.autoTableOptions || {};
 
         if(!autoTableOptions.theme) {
             autoTableOptions = $.extend(true, {}, getDxThemeOptions(), autoTableOptions);
@@ -221,7 +222,7 @@ var exportDataGrid = (function() {
                 resolve();
             });
         }).then(function() {
-            var pdfDocOptions = $.extend(true, {},
+            var pdfOptions = $.extend(true, {},
                 {
                     head: headerMatrix,
                     body: rowMatrix,
@@ -229,8 +230,8 @@ var exportDataGrid = (function() {
                 },
                 autoTableOptions);
 
-            var _didDrawCell = pdfDocOptions.didDrawCell;
-            pdfDocOptions.didDrawCell = function(data) {
+            var _didDrawCell = pdfOptions.didDrawCell;
+            pdfOptions.didDrawCell = function(data) {
                 var rowIndex = data.row.index;
                 var columnIndex = data.column.index;
                 var isBreakedRow = false;
@@ -265,7 +266,7 @@ var exportDataGrid = (function() {
                     lastDrawedBodyRowIndex = data.row.index;
             };
 
-            pdfDoc.autoTable(pdfDocOptions);
+            pdfDoc.autoTable(pdfOptions);
         });
     }
 

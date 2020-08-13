@@ -60,12 +60,18 @@
         function export_to_PDF() {
             var pdfDoc = new jsPDF('p', 'pt', 'a4');
 
-            var grid_1 = $('#DataGrid_1').dxDataGrid('instance');
-            var grid_2 = $('#DataGrid_2').dxDataGrid('instance');
+            var options_1 = {
+                pdfDoc: pdfDoc,
+                component: $('#DataGrid_1').dxDataGrid('instance')
+            };
+            var options_2 = {
+                pdfDoc: pdfDoc,
+                component: $('#DataGrid_2').dxDataGrid('instance')
+            };
 
-            exportDataGrid(pdfDoc, grid_1).then(function() {
+            exportDataGrid(options_1).then(function() {
                 pdfDoc.addPage();
-                exportDataGrid(pdfDoc, grid_2).then(function() {
+                exportDataGrid(options_2).then(function() {
                     pdfDoc.save("filePDF.pdf");
                 });
             });
